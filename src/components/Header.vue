@@ -23,7 +23,7 @@ const userRole = "user";
 
 <template>
   <header
-    class="bg-white shadow-sm border-b border-gray-200 w-full sticky top-0 z-50"
+    class="bg-white shadow-md border-b border-b-solid border-gray-200 w-full sticky top-0 z-50"
   >
     <div class="mx-auto px-6 py-4">
       <div class="flex items-center">
