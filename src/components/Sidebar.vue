@@ -1,9 +1,21 @@
+<script lang="ts">
+export type Category =
+  | "all"
+  | "computer"
+  | "literature"
+  | "history"
+  | "sciences"
+  | "psychology";
+
+export type CategoryEnum = { title: string; value: string };
+</script>
+
 <script setup lang="ts">
 import { ref } from "vue";
 import Filter from "./icons/Filter.vue";
 import BookOpen from "./icons/BookOpen.vue";
 
-const categories = [
+const categories: CategoryEnum[] = [
   {
     title: "همه",
     value: "all",
@@ -22,6 +34,10 @@ const categories = [
   },
   {
     title: "علوم",
+    value: "sciences",
+  },
+  {
+    title: "داستان",
     value: "sciences",
   },
   {

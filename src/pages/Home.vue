@@ -8,6 +8,6 @@ import Sidebar from "../components/Sidebar.vue";
   <main class="flex flex-col w-full">
     <Header />
     <Sidebar class="self-end" />
-    <Footer class="" />
+    <Footer />
   </main>
 </template>
