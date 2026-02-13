@@ -21,10 +21,7 @@ function handleError() {
 </script>
 
 <template>
-  <div
-    v-if="didError"
-    class="inline-block bg-gray-100 text-center align-middle"
-  >
+  <div v-if="didError" class="bg-gray-100 text-center">
     <div class="flex items-center justify-center w-full h-full">
       <img
         :src="ERROR_IMG_SRC"

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // import { Edit2, Trash2, Calendar } from "lucide-react";
 import ImageWithFallback from "./ImageWithFallback.vue";
-import type { BookProps } from "./repository/book";
+import type { BookProps } from "../repository/book";
 
 interface BookCardProps {
   book: BookProps;
@@ -67,7 +67,9 @@ const bookImageMap: Record<string, string> = {
   <div
     class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow border border-solid border-gray-200 overflow-hidden group"
   >
-    <div class="relative h-64 bg-gray-100 overflow-hidden">
+    <div
+      class="flex items-center justify-center h-64 bg-gray-100 overflow-hidden"
+    >
       <ImageWithFallback
         :src="bookImageMap['computer-programming-book']"
         :alt="book.title"

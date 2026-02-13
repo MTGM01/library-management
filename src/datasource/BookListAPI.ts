@@ -1,4 +1,4 @@
-import type { BookProps, Category } from "../components/repository/book";
+import type { BookProps, Category } from "../repository/book";
 import { httpGet } from "./setup";
 
 export interface API_Book_List_Input {

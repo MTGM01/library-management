@@ -1,4 +1,4 @@
-import { API_Book_List } from "../../datasource/BookListAPI";
+import { API_Book_List } from "../datasource/BookListAPI";
 
 export type Category =
   | "all"

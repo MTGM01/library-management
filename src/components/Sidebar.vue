@@ -6,7 +6,7 @@ export type CategoryEnum = { title: string; value: Category };
 import { ref } from "vue";
 import Filter from "./icons/Filter.vue";
 import BookOpen from "./icons/BookOpen.vue";
-import type { Category } from "./repository/book";
+import type { Category } from "../repository/book";
 
 const categories: CategoryEnum[] = [
   {

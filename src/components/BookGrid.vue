@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // import { Book, UserRole } from "../App";
 import BookCard from "./BookCard.vue";
-import type { BookProps } from "./repository/book";
+import type { BookProps } from "../repository/book";
 
 interface BookGridProps {
   books: BookProps[] | null;

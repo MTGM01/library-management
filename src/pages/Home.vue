@@ -3,11 +3,7 @@ import { ref, watchEffect } from "vue";
 import BookGrid from "../components/BookGrid.vue";
 import Footer from "../components/Footer.vue";
 import Header from "../components/Header.vue";
-import {
-  Book,
-  type Category,
-  type BookProps,
-} from "../components/repository/book";
+import { Book, type Category, type BookProps } from "../repository/book";
 import Sidebar from "../components/Sidebar.vue";
 
 const books = ref<BookProps[] | null>(null);
