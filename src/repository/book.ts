@@ -14,8 +14,6 @@ export interface BookProps {
   title: string;
   /** نویسنده */
   author: string;
-  /** قیمت */
-  price: number;
   /** شماره شابک */
   ISBN: string;
   /** نام دسته بندی */
@@ -30,9 +28,6 @@ export class Book {
 
   /** نویسنده کتاب */
   public author: string;
-
-  /** قیمت کتاب */
-  public price: number;
 
   /** شماره شابک */
   public ISBN: string;
@@ -55,7 +50,6 @@ export class Book {
   constructor(bookData: {
     title: string;
     author: string;
-    price: number;
     ISBN: string;
     category: Category;
     description: string;
@@ -63,7 +57,6 @@ export class Book {
   }) {
     this.title = bookData.title;
     this.author = bookData.author;
-    this.price = bookData.price;
     this.ISBN = bookData.ISBN;
     this.category = bookData.category;
     this.description = bookData.description;
@@ -82,15 +75,6 @@ export class Book {
 
   static getList(category: Category) {
     return API_Book_List({ category });
-  }
-
-  /** دریافت قیمت با فرمت مناسب */
-  public getFormattedPrice(): string {
-    return new Intl.NumberFormat("fa-IR", {
-      style: "currency",
-      currency: "IRR",
-      minimumFractionDigits: 0,
-    }).format(this.price);
   }
 
   /** دریافت خلاصه توضیحات */
@@ -116,7 +100,6 @@ export class Book {
       id: this.id,
       title: this.title,
       author: this.author,
-      price: this.price,
       ISBN: this.ISBN,
       category: this.category,
       description: this.description,
@@ -130,7 +113,6 @@ export class Book {
     const book = new Book({
       title: json.title,
       author: json.author,
-      price: json.price,
       ISBN: json.ISBN,
       category: json.category,
       description: json.description,
@@ -169,10 +151,6 @@ export class Book {
 
     if (!this.author || this.author.trim().length < 1) {
       errors.push("نویسنده کتاب نمی‌تواند خالی باشد");
-    }
-
-    if (this.price <= 0) {
-      errors.push("قیمت باید بزرگتر از صفر باشد");
     }
 
     if (!this.ISBN || !this.isValidISBN()) {

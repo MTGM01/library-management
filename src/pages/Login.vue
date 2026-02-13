@@ -1,21 +1,36 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { User } from "../repository/user";
 
 const router = useRouter();
-const username = ref("");
+const userName = ref("");
 const password = ref("");
 
-const handleLogin = () => {
+async function handleLogin() {
+  const result = await User.login({
+    userName: userName.value,
+    password: password.value,
+  });
   // ذخیره توکن یا وضعیت لاگین
   localStorage.setItem("isAuthenticated", "true");
-  localStorage.setItem("user", JSON.stringify({ username: username.value }));
+  localStorage.setItem(
+    "user",
+    JSON.stringify({
+      userName: result.result.userName,
+      password: result.result.password,
+      mobile: result.result.mobile,
+      role: result.result.role,
+      crime: result.result.crime,
+      reservedBooks: result.result.reservedBooks,
+    }),
+  );
 
   const redirectPath =
     router.currentRoute.value.query.redirect?.toString() || "/";
 
   router.push(redirectPath);
-};
+}
 </script>
 
 <template>
@@ -26,7 +41,7 @@ const handleLogin = () => {
         <div class="flex flex-col items-end mb-4 w-full">
           <label class="block text-gray-700 mb-2">نام کاربری</label>
           <input
-            v-model="username"
+            v-model="userName"
             type="text"
             class="w-96% p-2 border border-solid rounded-lg"
             required
