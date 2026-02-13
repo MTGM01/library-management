@@ -1,4 +1,4 @@
-const baseApi = "http://localhost:4000/lib/";
+const baseApi = "http://localhost:4000/lib";
 
 export async function httpGet<T>(path: string): Promise<T> {
   const response = await fetch(`${baseApi}${path}`);

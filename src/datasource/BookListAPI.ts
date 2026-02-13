@@ -1,4 +1,4 @@
-import type { Category } from "../components/Sidebar.vue";
+import type { BookProps, Category } from "../components/repository/book";
 import { httpGet } from "./setup";
 
 export interface API_Book_List_Input {
@@ -6,20 +6,9 @@ export interface API_Book_List_Input {
 }
 
 export interface API_Book_List_Output {
-  /** عنوان */
-  title: string;
-  /** نویسنده */
-  author: string;
-  /** قیمت */
-  price: number;
-  /** شماره شابک */
-  ISBN: string;
-  /** نام دسته بندی */
-  category: Category;
-  /** توضیحات */
-  description: string;
+  result: BookProps[];
 }
 
-export function API_Otp_SendByMobile(body: API_Book_List_Input) {
-  return httpGet<API_Book_List_Output>(`/books/${body.category}`);
+export function API_Book_List(body: API_Book_List_Input) {
+  return httpGet<API_Book_List_Output>(`/books?category=${body.category}`);
 }

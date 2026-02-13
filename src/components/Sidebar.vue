@@ -1,19 +1,12 @@
 <script lang="ts">
-export type Category =
-  | "all"
-  | "computer"
-  | "literature"
-  | "history"
-  | "sciences"
-  | "psychology";
-
-export type CategoryEnum = { title: string; value: string };
+export type CategoryEnum = { title: string; value: Category };
 </script>
 
 <script setup lang="ts">
 import { ref } from "vue";
 import Filter from "./icons/Filter.vue";
 import BookOpen from "./icons/BookOpen.vue";
+import type { Category } from "./repository/book";
 
 const categories: CategoryEnum[] = [
   {
@@ -30,7 +23,7 @@ const categories: CategoryEnum[] = [
   },
   {
     title: "تاریخ",
-    value: "hystory",
+    value: "history",
   },
   {
     title: "علوم",
@@ -38,7 +31,7 @@ const categories: CategoryEnum[] = [
   },
   {
     title: "داستان",
-    value: "sciences",
+    value: "story",
   },
   {
     title: "روانشناسی",
@@ -47,6 +40,15 @@ const categories: CategoryEnum[] = [
 ];
 
 const selectedCategory = ref("all");
+
+const emit = defineEmits<{
+  (event: "select", value: Category): void;
+}>();
+
+function selectCategory(categoryValue: Category) {
+  selectedCategory.value = categoryValue;
+  emit("select", categoryValue);
+}
 // interface SidebarProps {
 //   categories: string[];
 //   selectedCategory: string;
@@ -71,7 +73,7 @@ const selectedCategory = ref("all");
         <button
           v-for="category in categories"
           :key="category.value"
-          @click="selectedCategory = category.value"
+          @click="selectCategory(category.value)"
           class="w-full text-right px-4 py-3 rounded-lg transition-colors border-none outline-none bg-transparent flex items-center justify-end cursor-pointer gap-3"
           :class="
             selectedCategory === category.value
