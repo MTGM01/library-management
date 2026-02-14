@@ -2,6 +2,9 @@ import {
   API_User_Login,
   type API_User_Login_Input,
 } from "../datasource/LoginAPI";
+import { showToast } from "../helper/showToast";
+import { User_SetIsAuthenticated } from "./keyval/userIsAuthenticated";
+import { User_SetProfile } from "./keyval/userProfile";
 
 export type UserRole = "ADMIN" | "USER";
 
@@ -25,7 +28,7 @@ export class User {
   public userName: string;
 
   /** پسورد (توجه: در برنامه واقعی هرگز پسورد را به صورت plain ذخیره نکنید) */
-  private _password: string;
+  private password: string;
 
   /** شماره موبایل */
   public mobile: string;
@@ -39,20 +42,8 @@ export class User {
   /** لیست کتاب های رزرو شده */
   public reservedBooks: Array<any>;
 
-  /** تاریخ ایجاد حساب */
-  public createdAt: Date;
-
-  /** آخرین بروزرسانی */
-  public updatedAt: Date;
-
-  /** شناسه یکتا */
-  public id?: string;
-
-  /** وضعیت فعال بودن حساب */
-  public isActive: boolean = true;
-
-  /** تاریخ آخرین ورود */
-  public lastLogin?: Date;
+  /** پیغام های مربوط به درخواست های شیء یوزر */
+  public message?: string;
 
   constructor(userData: {
     userName: string;
@@ -61,34 +52,50 @@ export class User {
     crime?: number;
     role: UserRole;
     reservedBooks?: Array<any>;
-    id?: string;
   }) {
     this.userName = userData.userName;
-    this._password = userData.password; // در عمل باید هش شود
+    this.password = userData.password; // در عمل باید هش شود
     this.mobile = userData.mobile;
     this.crime = userData.crime || 0;
     this.role = userData.role;
     this.reservedBooks = userData.reservedBooks || [];
-    this.id = userData.id;
-    this.createdAt = new Date();
-    this.updatedAt = new Date();
   }
 
   /** دریافت پسورد (با احتیاط استفاده شود) */
-  public getPassword(): string {
-    return this._password;
+  get getPassword(): string {
+    return this.password;
   }
 
-  static login(body: API_User_Login_Input) {
-    return API_User_Login(body);
+  static async login(body: API_User_Login_Input) {
+    try {
+      const result = await API_User_Login(body);
+      User_SetIsAuthenticated(true);
+      User_SetProfile({
+        userName: result.result.userName,
+        password: result.result.password,
+        mobile: result.result.mobile,
+        role: result.result.role,
+        crime: result.result.crime,
+        reservedBooks: result.result.reservedBooks,
+      });
+
+      if (result.message === "You are logged in successfully")
+        showToast("success", "با موفقیت وارد شدید");
+    } catch (error: any) {
+      showToast(
+        "error",
+        "کاربر یافت نشد ! (نام کاربری و رمز عبور خود را با دقت وارد کنید)",
+      );
+      showToast("error", "اتصال به اینترنت خود را چک کنید");
+      console.error(error);
+    }
   }
 
   /** تنظیم پسورد جدید */
   public setPassword(newPassword: string): void {
     // اینجا می‌توانید اعتبارسنجی و هش کردن پسورد را انجام دهید
     if (this.isValidPassword(newPassword)) {
-      this._password = newPassword;
-      this.updatedAt = new Date();
+      this.password = newPassword;
     } else {
       throw new Error("پسورد باید حداقل ۸ کاراکتر و شامل حرف و عدد باشد");
     }
@@ -106,14 +113,13 @@ export class User {
   /** بررسی تطابق پسورد */
   public verifyPassword(password: string): boolean {
     // در عمل باید هش شده را مقایسه کنید
-    return this._password === password;
+    return this.password === password;
   }
 
   /** افزودن کتاب به لیست رزرو شده */
   public reserveBook(book: any): void {
     if (!this.reservedBooks.some((b) => b.id === book.id)) {
       this.reservedBooks.push(book);
-      this.updatedAt = new Date();
     }
   }
 
@@ -122,7 +128,6 @@ export class User {
     this.reservedBooks = this.reservedBooks.filter(
       (book) => book.id !== bookId,
     );
-    this.updatedAt = new Date();
   }
 
   /** بررسی وجود کتاب در لیست رزرو شده */
@@ -139,7 +144,6 @@ export class User {
   public addCrime(amount: number): void {
     if (amount > 0) {
       this.crime += amount;
-      this.updatedAt = new Date();
     }
   }
 
@@ -147,7 +151,6 @@ export class User {
   public payCrime(amount: number): void {
     if (amount > 0 && amount <= this.crime) {
       this.crime -= amount;
-      this.updatedAt = new Date();
     } else {
       throw new Error("مبلغ پرداختی معتبر نیست");
     }
@@ -167,23 +170,6 @@ export class User {
     }).format(this.crime);
   }
 
-  /** به‌روزرسانی آخرین ورود */
-  public updateLastLogin(): void {
-    this.lastLogin = new Date();
-  }
-
-  /** غیرفعال کردن حساب */
-  public deactivate(): void {
-    this.isActive = false;
-    this.updatedAt = new Date();
-  }
-
-  /** فعال کردن حساب */
-  public activate(): void {
-    this.isActive = true;
-    this.updatedAt = new Date();
-  }
-
   /** اعتبارسنجی شماره موبایل */
   public isValidMobile(): boolean {
     const mobileRegex = /^09[0-9]{9}$/;
@@ -193,31 +179,22 @@ export class User {
   /** دریافت اطلاعات کاربر به صورت امن (بدون پسورد) */
   public getSafeInfo(): object {
     return {
-      id: this.id,
       userName: this.userName,
       mobile: this.mobile,
       role: this.role,
       crime: this.crime,
       reservedBooks: this.reservedBooks,
-      createdAt: this.createdAt,
-      isActive: this.isActive,
-      lastLogin: this.lastLogin,
     };
   }
 
   /** دریافت اطلاعات کامل برای مدیریت */
   public toJSON(): object {
     return {
-      id: this.id,
       userName: this.userName,
       mobile: this.mobile,
       role: this.role,
       crime: this.crime,
       reservedBooks: this.reservedBooks,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt,
-      isActive: this.isActive,
-      lastLogin: this.lastLogin,
     };
   }
 
@@ -225,19 +202,12 @@ export class User {
   public static fromJSON(json: any): User {
     const user = new User({
       userName: json.userName,
-      password: json._password || json.password || "", // در عمل پسورد هش شده است
+      password: json.password || json.password || "", // در عمل پسورد هش شده است
       mobile: json.mobile,
       crime: json.crime,
       role: json.role,
       reservedBooks: json.reservedBooks || [],
-      id: json.id,
     });
-
-    // بازیابی اطلاعات اضافی
-    if (json.createdAt) user.createdAt = new Date(json.createdAt);
-    if (json.updatedAt) user.updatedAt = new Date(json.updatedAt);
-    if (json.lastLogin) user.lastLogin = new Date(json.lastLogin);
-    if (json.isActive !== undefined) user.isActive = json.isActive;
 
     return user;
   }

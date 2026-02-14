@@ -2,34 +2,28 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { User } from "../repository/user";
+import CircleLoading from "../components/CircleLoading.vue";
 
 const router = useRouter();
 const userName = ref("");
 const password = ref("");
+const isLoading = ref(false);
 
 async function handleLogin() {
-  const result = await User.login({
-    userName: userName.value,
-    password: password.value,
-  });
-  // ذخیره توکن یا وضعیت لاگین
-  localStorage.setItem("isAuthenticated", "true");
-  localStorage.setItem(
-    "user",
-    JSON.stringify({
-      userName: result.result.userName,
-      password: result.result.password,
-      mobile: result.result.mobile,
-      role: result.result.role,
-      crime: result.result.crime,
-      reservedBooks: result.result.reservedBooks,
-    }),
-  );
-
-  const redirectPath =
-    router.currentRoute.value.query.redirect?.toString() || "/";
-
-  router.push(redirectPath);
+  try {
+    isLoading.value = true;
+    await User.login({
+      userName: userName.value,
+      password: password.value,
+    });
+    const redirectPath =
+      router.currentRoute.value.query.redirect?.toString() || "/";
+    router.push(redirectPath);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    isLoading.value = false;
+  }
 }
 </script>
 
@@ -58,9 +52,12 @@ async function handleLogin() {
         </div>
         <button
           type="submit"
-          class="w-full bg-blue-600 text-white py-2 rounded-lg cursor-pointer hover:bg-blue-700 border-none"
+          :disabled="isLoading"
+          class="w-full bg-blue-600 text-white h-9 text-15px relative rounded-lg cursor-pointer hover:bg-blue-700 border-none"
+          :class="{ 'opacity-70 cursor-not-allowed': isLoading }"
         >
-          ورود
+          <span v-if="!isLoading">ورود</span>
+          <CircleLoading v-else class="absolute inset-0 m-auto w-6 h-6" />
         </button>
       </form>
     </div>
