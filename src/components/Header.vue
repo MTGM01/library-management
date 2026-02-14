@@ -1,24 +1,23 @@
 <script setup lang="ts">
+import { computed } from "vue";
+import type { User } from "../repository/user";
 import BookOpen from "./icons/BookOpen.vue";
 import LogOut from "./icons/LogOut.vue";
 import Search from "./icons/Search.vue";
 import UnknownUser from "./icons/UnknownUser.vue";
 
+const { user } = defineProps<{
+  user: User;
+}>();
+
+const userRole = computed(() => user.userRole);
 // import { Search, User, BookOpen, LogOut } from 'lucide-react';
 // import { UserRole } from '../App';
-
-// interface HeaderProps {
-//   userRole: UserRole;
-//   onSearch: (query: string) => void;
-//   onRoleChange: (role: UserRole) => void;
-// }
 
 // export function Header({ userRole, onSearch, onRoleChange }: HeaderProps) {
 //   return (
 //   );
 // }
-
-const userRole = "user";
 </script>
 
 <template>
@@ -41,11 +40,11 @@ const userRole = "user";
             >
               <UnknownUser class="w-5 h-5 text-blue-600" />
             </div>
-            <div class="text-left">
-              <p class="text-sm font-medium text-gray-900">
-                <!-- {userRole === 'admin' ? 'مدیر سیستم' : 'کاربر عادی'} -->
-              </p>
-              <p class="text-xs text-gray-500">user@example.com</p>
+            <div class="flex flex-col gap-1 text-left">
+              <span class="text-sm font-medium text-gray-900">
+                {{ userRole === "ADMIN" ? "مدیر سیستم" : "کاربر عادی" }}
+              </span>
+              <span class="text-xs text-gray-500">user@example.com</span>
             </div>
             <div class="h-9 w-1px bg-gray-200" />
           </div>
@@ -54,7 +53,7 @@ const userRole = "user";
             <button
               class="px-3 py-1.5 rounded text-sm transition-colors border-none outline-none bg-transparent"
               :class="
-                userRole === 'user'
+                userRole === 'USER'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               "
@@ -65,7 +64,7 @@ const userRole = "user";
             <button
               class="px-3 py-1.5 rounded text-sm transition-colors bg-transparent outline-none border-none"
               :class="
-                userRole === 'admin'
+                userRole === 'ADMIN'
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               "

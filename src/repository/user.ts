@@ -25,25 +25,25 @@ export interface UserProps {
 
 export class User {
   /** نام کاربری */
-  public userName: string;
+  protected userName: string;
 
   /** پسورد (توجه: در برنامه واقعی هرگز پسورد را به صورت plain ذخیره نکنید) */
-  private password: string;
+  protected password: string;
 
   /** شماره موبایل */
-  public mobile: string;
+  protected mobile: string;
 
   /** مبلغ جریمه */
-  public crime: number;
+  protected crime: number;
 
   /** نقش کاربر */
-  public role: UserRole;
+  protected role: UserRole;
 
   /** لیست کتاب های رزرو شده */
-  public reservedBooks: Array<any>;
+  protected reservedBooks: Array<any>;
 
   /** پیغام های مربوط به درخواست های شیء یوزر */
-  public message?: string;
+  protected message?: string;
 
   constructor(userData: {
     userName: string;
@@ -64,6 +64,10 @@ export class User {
   /** دریافت پسورد (با احتیاط استفاده شود) */
   get getPassword(): string {
     return this.password;
+  }
+
+  get userRole(): UserRole {
+    return this.role;
   }
 
   static async login(body: API_User_Login_Input) {
