@@ -1,23 +1,26 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed } from "vue";
 import type { User, UserRole } from "../repository/user";
 import BookOpen from "./icons/BookOpen.vue";
 import LogOut from "./icons/LogOut.vue";
 import Search from "./icons/Search.vue";
 import UnknownUser from "./icons/UnknownUser.vue";
-import { User_GetRole, User_SetRole } from "../repository/keyval/userRole";
 import { useRouter } from "vue-router";
 
 const { user } = defineProps<{
   user: User;
 }>();
 
-const userRole = ref(User_GetRole() ? User_GetRole() : user.userRole);
+const userRole = computed({
+  get: () => user.userRole,
+  set: (value: UserRole) => {
+    user.userRole = value;
+  },
+});
 const router = useRouter();
 
 function changeUserRole(role: UserRole) {
   userRole.value = role;
-  User_SetRole(role);
 }
 
 function logout() {

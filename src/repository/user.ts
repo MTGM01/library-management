@@ -70,6 +70,10 @@ export class User {
     return this.role;
   }
 
+  set userRole(role: UserRole) {
+    this.role = role;
+  }
+
   static async login(body: API_User_Login_Input) {
     try {
       const result = await API_User_Login(body);
