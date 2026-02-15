@@ -6,16 +6,23 @@ import LogOut from "./icons/LogOut.vue";
 import Search from "./icons/Search.vue";
 import UnknownUser from "./icons/UnknownUser.vue";
 import { User_GetRole, User_SetRole } from "../repository/keyval/userRole";
+import { useRouter } from "vue-router";
 
 const { user } = defineProps<{
   user: User;
 }>();
 
 const userRole = ref(User_GetRole() ? User_GetRole() : user.userRole);
+const router = useRouter();
 
 function changeUserRole(role: UserRole) {
   userRole.value = role;
   User_SetRole(role);
+}
+
+function logout() {
+  localStorage.clear();
+  router.push("/login");
 }
 </script>
 
@@ -29,6 +36,7 @@ function changeUserRole(role: UserRole) {
           <button
             class="p-2 hover:bg-red-50 rounded-lg bg-transparent outline-none border-none cursor-pointer transition-colors"
             title="خروج"
+            @click="logout"
           >
             <LogOut class="w-5 h-5 text-gray-600 hover:text-red-600" />
           </button>

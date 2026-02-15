@@ -10,7 +10,7 @@ import { User_GetProfile } from "../repository/keyval/userProfile";
 
 const books = ref<BookProps[] | null>(null);
 const category = ref<Category>("all");
-const user = ref<User>(new User(User_GetProfile()));
+const user = new User(User_GetProfile());
 
 watchEffect(async () => {
   books.value = (await Book.getList(category.value)).result;
