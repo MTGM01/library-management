@@ -1,23 +1,22 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import type { User } from "../repository/user";
+import { ref } from "vue";
+import type { User, UserRole } from "../repository/user";
 import BookOpen from "./icons/BookOpen.vue";
 import LogOut from "./icons/LogOut.vue";
 import Search from "./icons/Search.vue";
 import UnknownUser from "./icons/UnknownUser.vue";
+import { User_GetRole, User_SetRole } from "../repository/keyval/userRole";
 
 const { user } = defineProps<{
   user: User;
 }>();
 
-const userRole = computed(() => user.userRole);
-// import { Search, User, BookOpen, LogOut } from 'lucide-react';
-// import { UserRole } from '../App';
+const userRole = ref(User_GetRole() ? User_GetRole() : user.userRole);
 
-// export function Header({ userRole, onSearch, onRoleChange }: HeaderProps) {
-//   return (
-//   );
-// }
+function changeUserRole(role: UserRole) {
+  userRole.value = role;
+  User_SetRole(role);
+}
 </script>
 
 <template>
@@ -57,8 +56,8 @@ const userRole = computed(() => user.userRole);
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               "
+              @click="changeUserRole('USER')"
             >
-              <!-- onClick={() => onRoleChange('user')} -->
               کاربر
             </button>
             <button
@@ -68,8 +67,8 @@ const userRole = computed(() => user.userRole);
                   ? 'bg-white text-blue-600 shadow-sm'
                   : 'text-gray-600 hover:text-gray-900'
               "
+              @click="changeUserRole('ADMIN')"
             >
-              <!-- onClick={() => onRoleChange('admin')} -->
               مدیر
             </button>
           </div>
