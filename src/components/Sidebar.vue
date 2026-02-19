@@ -1,43 +1,10 @@
-<script lang="ts">
-export type CategoryEnum = { title: string; value: Category };
-</script>
-
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import Filter from "./icons/Filter.vue";
 import BookOpen from "./icons/BookOpen.vue";
-import type { Category } from "../repository/book";
+import { booksCategories, type Category } from "../repository/book";
 
-const categories: CategoryEnum[] = [
-  {
-    title: "همه",
-    value: "all",
-  },
-  {
-    title: "کامپیوتر",
-    value: "computer",
-  },
-  {
-    title: "ادبیات",
-    value: "literature",
-  },
-  {
-    title: "تاریخ",
-    value: "history",
-  },
-  {
-    title: "علوم",
-    value: "sciences",
-  },
-  {
-    title: "داستان",
-    value: "story",
-  },
-  {
-    title: "روانشناسی",
-    value: "psychology",
-  },
-];
+const categories = computed(() => booksCategories);
 
 const selectedCategory = ref("all");
 

@@ -9,6 +9,8 @@ export type Category =
   | "story"
   | "psychology";
 
+export type CategoryEnum = { title: string; value: Category };
+
 export interface BookProps {
   /** عنوان */
   title: string;
@@ -21,6 +23,37 @@ export interface BookProps {
   /** توضیحات */
   description: string;
 }
+
+export const booksCategories: CategoryEnum[] = [
+  {
+    title: "همه",
+    value: "all",
+  },
+  {
+    title: "کامپیوتر",
+    value: "computer",
+  },
+  {
+    title: "ادبیات",
+    value: "literature",
+  },
+  {
+    title: "تاریخ",
+    value: "history",
+  },
+  {
+    title: "علوم",
+    value: "sciences",
+  },
+  {
+    title: "داستان",
+    value: "story",
+  },
+  {
+    title: "روانشناسی",
+    value: "psychology",
+  },
+];
 
 export class Book {
   /** عنوان کتاب */
