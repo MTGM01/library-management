@@ -1,3 +1,7 @@
+import {
+  API_Add_New_Book,
+  type API_Add_Book_Input,
+} from "../datasource/AddBookAPI";
 import { API_Book_List } from "../datasource/BookListAPI";
 
 export type Category =
@@ -20,6 +24,10 @@ export interface BookProps {
   ISBN: string;
   /** نام دسته بندی */
   category: Category;
+  /** تعداد کل نسخه */
+  total: number;
+  /** تعداد نسخه های موجود */
+  availableCount: number;
   /** توضیحات */
   description: string;
 }
@@ -108,6 +116,10 @@ export class Book {
 
   static getList(category: Category) {
     return API_Book_List({ category });
+  }
+
+  static addNewBook(book: API_Add_Book_Input) {
+    return API_Add_New_Book(book);
   }
 
   /** دریافت خلاصه توضیحات */

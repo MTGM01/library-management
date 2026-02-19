@@ -42,7 +42,7 @@ watchEffect(async () => {
   </main>
   <AddBookModal
     dir="rtl"
-    :isOpen="openAddNewBookModal"
+    v-model="openAddNewBookModal"
     @close="openAddNewBookModal = false"
   />
 </template>
