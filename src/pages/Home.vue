@@ -25,6 +25,7 @@ watchEffect(async () => {
     <div class="flex grow justify-end">
       <div class="flex flex-col m-6 w-full">
         <button
+          v-if="user.userRole === 'ADMIN'"
           type="button"
           class="w-fit flex items-center gap-2 px-6 py-3 mb-6 border-none bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
           @click="openAddNewBookModal = true"
