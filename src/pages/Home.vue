@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from "vue";
+import { provide, ref, watchEffect } from "vue";
 import BookGrid from "../components/BookGrid.vue";
 import Footer from "../components/Footer.vue";
 import Header from "../components/Header.vue";
@@ -13,6 +13,12 @@ const openAddNewBookModal = ref(false);
 const books = ref<BookProps[] | null>(null);
 const category = ref<Category>("all");
 const user = ref<User>(new User(User_GetProfile()));
+
+function updateList(booksList: BookProps[] | null) {
+  books.value = booksList;
+}
+
+provide("updateList", updateList);
 
 watchEffect(async () => {
   books.value = (await Book.getList(category.value)).result;

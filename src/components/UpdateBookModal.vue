@@ -1,19 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import Close from "./icons/Close.vue";
-import {
-  Book,
-  booksCategories,
-  type BookProps,
-  type Category,
-} from "../repository/book";
+import { Book, booksCategories, type Category } from "../repository/book";
 import CircleLoading from "./CircleLoading.vue";
 import { showToast } from "../helper/showToast";
 import type { API_Book_List_Output } from "../datasource/BookListAPI";
 
 const { isOpen, book } = defineProps<{
   isOpen: boolean;
-  book: BookProps;
+  book: Book;
 }>();
 
 const emit = defineEmits<{
@@ -34,20 +29,23 @@ const categories = computed(() => booksCategories);
 async function handleAddBook() {
   try {
     isLoading.value = true;
-    const result = await Book.addNewBook({
+    const result = await book.update({
+      id: book.id,
       title: title.value,
       author: author.value,
       ISBN: isbn.value,
-      category: category.value,
       total: total.value,
+      availableCount: availableCount.value,
+      category: category.value,
+      description: description.value,
     });
-    const booksList = await Book.getList(category.value);
+    const booksList = await Book.getList(book.category);
     emit("close");
     emit("update", booksList);
     showToast(
       "success",
-      result.message === "The Book Added to Library Successfully"
-        ? "کتاب جدید با موفقیت به کتابخانه افزوده شد"
+      result.message === "The Book Updated Successfully"
+        ? "کتاب با موفقیت ویرایش شد"
         : result.message,
     );
     title.value = "";

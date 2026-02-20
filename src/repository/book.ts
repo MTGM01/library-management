@@ -3,6 +3,10 @@ import {
   type API_Add_Book_Input,
 } from "../datasource/AddBookAPI";
 import { API_Book_List } from "../datasource/BookListAPI";
+import {
+  API_Update_Book,
+  type API_Update_Book_Input,
+} from "../datasource/UpdateBookAPI";
 
 export type Category =
   | "all"
@@ -16,6 +20,8 @@ export type Category =
 export type CategoryEnum = { title: string; value: Category };
 
 export interface BookProps {
+  /** شناسه کتاب */
+  _id: string;
   /** عنوان */
   title: string;
   /** نویسنده */
@@ -76,6 +82,12 @@ export class Book {
   /** دسته‌بندی کتاب */
   public category: Category;
 
+  /** تعداد کل نسخه ها */
+  public total: number;
+
+  /** تعداد نسخه های موجود */
+  public availableCount: number;
+
   /** توضیحات کتاب */
   public description: string;
 
@@ -86,7 +98,7 @@ export class Book {
   public updatedAt: Date;
 
   /** شناسه یکتا (برای دیتابیس) */
-  public id?: string;
+  public id: string;
 
   constructor(bookData: {
     title: string;
@@ -94,23 +106,19 @@ export class Book {
     ISBN: string;
     category: Category;
     description: string;
-    id?: string;
+    total: number;
+    availableCount: number;
+    _id: string;
   }) {
+    this.id = bookData._id;
     this.title = bookData.title;
     this.author = bookData.author;
     this.ISBN = bookData.ISBN;
     this.category = bookData.category;
+    this.total = bookData.total;
+    this.availableCount = bookData.availableCount;
     this.description = bookData.description;
-    this.id = bookData.id;
     this.createdAt = new Date();
-    this.updatedAt = new Date();
-  }
-
-  /** بروزرسانی اطلاعات کتاب */
-  update(
-    updateData: Partial<Omit<Book, "id" | "createdAt" | "updatedAt">>,
-  ): void {
-    Object.assign(this, updateData);
     this.updatedAt = new Date();
   }
 
@@ -118,8 +126,12 @@ export class Book {
     return API_Book_List({ category });
   }
 
-  static addNewBook(book: API_Add_Book_Input) {
+  static add(book: API_Add_Book_Input) {
     return API_Add_New_Book(book);
+  }
+
+  update(book: API_Update_Book_Input) {
+    return API_Update_Book(book);
   }
 
   /** دریافت خلاصه توضیحات */
@@ -154,23 +166,17 @@ export class Book {
   }
 
   /** ایجاد کتاب از روی شیء (مثلاً از دیتابیس) */
-  public static fromJSON(json: any): Book {
+  public static fromJSON(json: BookProps): Book {
     const book = new Book({
       title: json.title,
       author: json.author,
       ISBN: json.ISBN,
       category: json.category,
+      total: json.total,
+      availableCount: json.availableCount,
       description: json.description,
-      id: json.id,
+      _id: json._id,
     });
-
-    // بازیابی تاریخ‌ها اگر وجود داشته باشند
-    if (json.createdAt) {
-      book.createdAt = new Date(json.createdAt);
-    }
-    if (json.updatedAt) {
-      book.updatedAt = new Date(json.updatedAt);
-    }
 
     return book;
   }
@@ -210,10 +216,5 @@ export class Book {
       isValid: errors.length === 0,
       errors,
     };
-  }
-
-  /** کلون کردن کتاب */
-  public clone(): Book {
-    return Book.fromJSON(this.toJSON());
   }
 }

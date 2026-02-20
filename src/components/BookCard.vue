@@ -1,21 +1,23 @@
 <script setup lang="ts">
 import ImageWithFallback from "./ImageWithFallback.vue";
-import type { BookProps } from "../repository/book";
+import { Book, type BookProps } from "../repository/book";
 import EditBook from "./icons/EditBook.vue";
 import RemoveBook from "./icons/RemoveBook.vue";
 import { convertToCategoryName } from "../helper/showCategory";
-import { computed, ref } from "vue";
-import { User_GetRole } from "../repository/keyval/userRole";
+import { computed, inject, ref } from "vue";
 import type { UserRole } from "../repository/user";
 import UpdateBookModal from "./UpdateBookModal.vue";
 
-const { book } = defineProps<{
+const { book, userRole } = defineProps<{
   book: BookProps;
   userRole: UserRole;
 }>();
 
 const openUpdateBookModal = ref(false);
-
+const bookInstance = ref<Book>(new Book(book));
+const isAvailable = computed(() => book.availableCount > 0);
+const updateBooks =
+  inject<(booksList: BookProps[] | null) => void>("updateList");
 const bookImageMap: Record<string, string> = {
   "computer-programming-book":
     "https://images.unsplash.com/photo-1732304722020-be33345c00c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21wdXRlciUyMHByb2dyYW1taW5nJTIwYm9va3xlbnwxfHx8fDE3NzAyODI5NDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
@@ -30,8 +32,6 @@ const bookImageMap: Record<string, string> = {
   "psychology-book":
     "https://images.unsplash.com/photo-1549186723-be943b08f2c9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwc3ljaG9sb2d5JTIwYm9va3xlbnwxfHx8fDE3NzAzMDcwODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
 };
-
-const isAvailable = computed(() => book.availableCount > 0);
 </script>
 
 <template>
@@ -42,7 +42,7 @@ const isAvailable = computed(() => book.availableCount > 0);
       class="relative flex items-center justify-center h-64 bg-gray-100 overflow-hidden"
     >
       <div
-        v-if="User_GetRole() === 'ADMIN'"
+        v-if="userRole === 'ADMIN'"
         class="h-8 absolute top-3 left-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
       >
         <button
@@ -85,17 +85,22 @@ const isAvailable = computed(() => book.availableCount > 0);
       />
     </div>
 
-    <div class="p-5">
-      <div class="mb-3 text-right">
+    <div>
+      <div dir="rtl" class="mb-3 text-right">
         <span
-          class="inline-block px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md mb-2"
+          class="inline-block mt-5 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md mb-2"
         >
           {{ convertToCategoryName(book.category) }}
         </span>
         <h3 class="font-bold text-lg text-gray-900 mb-1 line-clamp-1">
           {{ book.title }}
         </h3>
-        <p class="text-sm text-gray-600 mb-2">{{ book.author }} :نویسنده</p>
+        <p class="flex items-center gap-1 text-sm text-gray-600 mb-2">
+          <span>نویسنده:</span>
+          <span>
+            {{ book.author }}
+          </span>
+        </p>
         <p class="text-sm text-gray-500 line-clamp-2">
           {{ book.description }}
         </p>
@@ -143,8 +148,9 @@ const isAvailable = computed(() => book.availableCount > 0);
   </div>
   <UpdateBookModal
     dir="rtl"
-    :book
+    :book="bookInstance"
     :isOpen="openUpdateBookModal"
     @close="openUpdateBookModal = false"
+    @update="(updatedBooksList) => updateBooks?.(updatedBooksList.result)"
   />
 </template>

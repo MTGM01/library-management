@@ -28,12 +28,13 @@ const categories = computed(() => booksCategories);
 async function handleAddBook() {
   try {
     isLoading.value = true;
-    const result = await Book.addNewBook({
+    const result = await Book.add({
       title: title.value,
       author: author.value,
       ISBN: isbn.value,
       category: category.value,
       total: total.value,
+      description: description.value,
     });
     const booksList = await Book.getList(selectedCategory ?? category.value);
     emit("close");
