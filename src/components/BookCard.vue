@@ -7,6 +7,7 @@ import { convertToCategoryName } from "../helper/showCategory";
 import { computed, inject, ref } from "vue";
 import type { UserRole } from "../repository/user";
 import UpdateBookModal from "./UpdateBookModal.vue";
+import Calendar from "./icons/Calendar.vue";
 
 const { book, userRole } = defineProps<{
   book: BookProps;
@@ -36,6 +37,7 @@ const bookImageMap: Record<string, string> = {
 
 <template>
   <div
+    dir="rtl"
     class="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow border border-solid border-gray-200 overflow-hidden group"
   >
     <div
@@ -63,7 +65,6 @@ const bookImageMap: Record<string, string> = {
       </div>
       <div class="absolute top-3 right-3">
         <span
-          dir="rtl"
           class="px-3 py-1 rounded-full text-xs font-medium"
           :class="
             isAvailable
@@ -86,7 +87,7 @@ const bookImageMap: Record<string, string> = {
     </div>
 
     <div>
-      <div dir="rtl" class="mb-3 text-right">
+      <div class="mb-3 text-right">
         <span
           class="inline-block mt-5 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md mb-2"
         >
@@ -115,35 +116,36 @@ const bookImageMap: Record<string, string> = {
         </div>
       </div>
 
-      <!-- {/* دکمه رزرو */}
-        {userRole !== 'admin' && (
-          <button
-            onClick={() => onReserve(book.id)}
-            disabled={!isAvailable}
-            class={`w-full py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
-              isAvailable
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            <Calendar class="w-4 h-4" />
-            {isAvailable ? 'رزرو کتاب' : 'در حال حاضر موجود نیست'}
-          </button>
-        )}
+      <button
+        v-if="userRole === 'USER'"
+        class="flex items-center justify-center gap-2 w-full py-3 relative bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer border-none"
+        :class="
+          isAvailable
+            ? 'bg-blue-600 text-white hover:bg-blue-700'
+            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+        "
+        :disabled="!isAvailable"
+      >
+        <Calendar class="w-4 h-4" />
+        <span>
+          {{ isAvailable ? "رزرو کتاب" : "در حال حاضر موجود نیست" }}
+        </span>
+      </button>
 
-        {/* نمایش تعداد کل برای Admin */}
-        {userRole === 'admin' && (
-          <div class="bg-gray-50 p-3 rounded-lg">
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-600">موجود:</span>
-              <span class="font-bold text-green-600">{book.availableCopies}</span>
-            </div>
-            <div class="flex justify-between text-sm mt-1">
-              <span class="text-gray-600">مجموع:</span>
-              <span class="font-bold text-gray-900">{book.totalCopies}</span>
-            </div>
-          </div>
-        )} -->
+      <div v-if="userRole === 'ADMIN'" class="bg-gray-50 p-3 rounded-lg">
+        <div class="flex justify-between text-sm">
+          <span class="text-gray-600">موجود:</span>
+          <span class="font-bold text-green-600">
+            {{ book.availableCount.toLocaleString("fa") }}
+          </span>
+        </div>
+        <div class="flex justify-between text-sm mt-1">
+          <span class="text-gray-600">مجموع:</span>
+          <span class="font-bold text-gray-900">
+            {{ book.total.toLocaleString("fa") }}
+          </span>
+        </div>
+      </div>
     </div>
   </div>
   <UpdateBookModal
