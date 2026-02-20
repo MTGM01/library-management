@@ -26,7 +26,7 @@ const availableCount = ref(book.availableCount);
 const description = ref(book.description);
 const categories = computed(() => booksCategories);
 
-async function handleAddBook() {
+async function handleUpdateBook() {
   try {
     isLoading.value = true;
     const result = await book.update({
@@ -48,11 +48,6 @@ async function handleAddBook() {
         ? "کتاب با موفقیت ویرایش شد"
         : result.message,
     );
-    title.value = "";
-    author.value = "";
-    isbn.value = "";
-    category.value = "all";
-    total.value = 0;
   } catch (error) {
     console.error(error);
     showToast("error", "خطایی رخ داده است !");
@@ -83,16 +78,15 @@ async function handleAddBook() {
         </button>
       </div>
 
-      <form @submit.prevent="handleAddBook" class="p-6 space-y-4">
+      <form @submit.prevent="handleUpdateBook" class="p-6 space-y-4">
         <div class="flex flex-col w-full">
           <label class="text-sm font-medium text-gray-700 mb-2">
-            نام کتاب *
+            نام کتاب
           </label>
           <input
             type="text"
             name="title"
             v-model="title"
-            required
             class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="نام کتاب را وارد کنید"
           />
@@ -100,13 +94,12 @@ async function handleAddBook() {
 
         <div class="flex flex-col w-full">
           <label class="text-sm font-medium text-gray-700 mb-2">
-            نویسنده *
+            نویسنده
           </label>
           <input
             type="text"
             name="author"
             v-model="author"
-            required
             class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="نام نویسنده را وارد کنید"
           />
@@ -114,12 +107,11 @@ async function handleAddBook() {
 
         <div class="flex flex-col w-full">
           <label class="text-sm font-medium text-gray-700 mb-2">
-            دسته‌بندی *
+            دسته‌بندی
           </label>
           <select
             name="category"
             v-model="category"
-            required
             class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option
@@ -134,13 +126,12 @@ async function handleAddBook() {
 
         <div class="flex flex-col w-full">
           <label class="text-sm font-medium text-gray-700 mb-2">
-            شماره ISBN *
+            شماره ISBN
           </label>
           <input
             type="text"
             name="isbn"
             v-model="isbn"
-            required
             class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="مثال: 978-1234567890"
           />
@@ -149,20 +140,19 @@ async function handleAddBook() {
         <div class="flex items-center gap-4">
           <div class="flex flex-col w-full">
             <label class="text-sm font-medium text-gray-700 mb-2">
-              تعداد کل نسخه‌ها *
+              تعداد کل نسخه‌ها
             </label>
             <input
               type="number"
               name="totalCopies"
               v-model="total"
               min="1"
-              required
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div class="flex flex-col w-full">
             <label class="text-sm font-medium text-gray-700 mb-2">
-              تعداد موجود *
+              تعداد موجود
             </label>
             <input
               type="number"
@@ -170,8 +160,7 @@ async function handleAddBook() {
               v-model="availableCount"
               min="0"
               :max="total"
-              required
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>

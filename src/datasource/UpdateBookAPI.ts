@@ -3,12 +3,12 @@ import { httpPut } from "./setup";
 
 export interface API_Update_Book_Input {
   id: string;
-  title: string;
-  author: string;
-  ISBN: string;
-  category: Category;
-  total: number;
-  availableCount: number;
+  title?: string;
+  author?: string;
+  ISBN?: string;
+  category?: Category;
+  total?: number;
+  availableCount?: number;
   description?: string;
 }
 

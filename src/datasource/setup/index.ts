@@ -38,10 +38,11 @@ export async function httpPut<T>(path: string, body: object): Promise<T> {
   return await response.json();
 }
 
-export async function httpDelete<T>(path: string): Promise<T> {
+export async function httpDelete<T>(path: string, body: object): Promise<T> {
   const response = await fetch(`${baseApi}${path}`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {

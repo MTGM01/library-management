@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, inject, ref, type Ref } from "vue";
 import Close from "./icons/Close.vue";
 import { Book, booksCategories, type Category } from "../repository/book";
 import CircleLoading from "./CircleLoading.vue";
 import { showToast } from "../helper/showToast";
 import type { API_Book_List_Output } from "../datasource/BookListAPI";
 
-const { isOpen, selectedCategory } = defineProps<{
+const { isOpen } = defineProps<{
   isOpen: boolean;
-  selectedCategory?: Category;
 }>();
 
 const emit = defineEmits<{
@@ -16,6 +15,7 @@ const emit = defineEmits<{
   (event: "add", data: API_Book_List_Output): void;
 }>();
 
+const selectedCategory = inject<Ref<Category>>("selectedCategory");
 const isLoading = ref(false);
 const title = ref("");
 const author = ref("");
@@ -36,7 +36,7 @@ async function handleAddBook() {
       total: total.value,
       description: description.value,
     });
-    const booksList = await Book.getList(selectedCategory ?? category.value);
+    const booksList = await Book.getList(selectedCategory!.value);
     emit("close");
     emit("add", booksList);
     showToast(

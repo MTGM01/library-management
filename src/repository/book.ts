@@ -4,6 +4,10 @@ import {
 } from "../datasource/AddBookAPI";
 import { API_Book_List } from "../datasource/BookListAPI";
 import {
+  API_Remove_Book,
+  type API_Remove_Book_Input,
+} from "../datasource/DeleteBookAPI";
+import {
   API_Update_Book,
   type API_Update_Book_Input,
 } from "../datasource/UpdateBookAPI";
@@ -134,12 +138,8 @@ export class Book {
     return API_Update_Book(book);
   }
 
-  /** دریافت خلاصه توضیحات */
-  public getShortDescription(maxLength: number = 100): string {
-    if (this.description.length <= maxLength) {
-      return this.description;
-    }
-    return this.description.substring(0, maxLength) + "...";
+  remove(id: API_Remove_Book_Input) {
+    return API_Remove_Book(id);
   }
 
   /** بررسی اعتبار شابک (الگوریتم ساده) */

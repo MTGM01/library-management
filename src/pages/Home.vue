@@ -19,6 +19,7 @@ function updateList(booksList: BookProps[] | null) {
 }
 
 provide("updateList", updateList);
+provide("selectedCategory", category);
 
 watchEffect(async () => {
   books.value = (await Book.getList(category.value)).result;

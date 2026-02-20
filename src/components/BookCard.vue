@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import ImageWithFallback from "./ImageWithFallback.vue";
-import { Book, type BookProps } from "../repository/book";
+import { Book, type BookProps, type Category } from "../repository/book";
 import EditBook from "./icons/EditBook.vue";
 import RemoveBook from "./icons/RemoveBook.vue";
 import { convertToCategoryName } from "../helper/showCategory";
-import { computed, inject, ref } from "vue";
+import { computed, inject, ref, type Ref } from "vue";
 import type { UserRole } from "../repository/user";
 import UpdateBookModal from "./UpdateBookModal.vue";
 import Calendar from "./icons/Calendar.vue";
+import RemoveConfirm from "./RemoveConfirm.vue";
+import { showToast } from "../helper/showToast";
 
 const { book, userRole } = defineProps<{
   book: BookProps;
@@ -15,10 +17,13 @@ const { book, userRole } = defineProps<{
 }>();
 
 const openUpdateBookModal = ref(false);
+const openRemoveBookModal = ref(false);
+const isLoading = ref(false);
 const bookInstance = ref<Book>(new Book(book));
 const isAvailable = computed(() => book.availableCount > 0);
 const updateBooks =
   inject<(booksList: BookProps[] | null) => void>("updateList");
+const selectedCategory = inject<Ref<Category>>("selectedCategory");
 const bookImageMap: Record<string, string> = {
   "computer-programming-book":
     "https://images.unsplash.com/photo-1732304722020-be33345c00c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21wdXRlciUyMHByb2dyYW1taW5nJTIwYm9va3xlbnwxfHx8fDE3NzAyODI5NDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
@@ -33,6 +38,28 @@ const bookImageMap: Record<string, string> = {
   "psychology-book":
     "https://images.unsplash.com/photo-1549186723-be943b08f2c9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwc3ljaG9sb2d5JTIwYm9va3xlbnwxfHx8fDE3NzAzMDcwODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
 };
+
+async function handleRemoveBook() {
+  try {
+    isLoading.value = true;
+    const result = await bookInstance.value.remove({
+      id: bookInstance.value.id,
+    });
+    const booksList = await Book.getList(selectedCategory!.value);
+    updateBooks?.(booksList.result);
+    showToast(
+      "success",
+      result.message === "The Book Removed Successfully"
+        ? "کتاب با موفقیت حذف شد"
+        : result.message,
+    );
+  } catch (error) {
+    console.error(error);
+    showToast("error", "خطایی رخ داده است !");
+  } finally {
+    isLoading.value = false;
+  }
+}
 </script>
 
 <template>
@@ -49,6 +76,7 @@ const bookImageMap: Record<string, string> = {
       >
         <button
           type="button"
+          @click="openRemoveBookModal = true"
           class="bg-white p-2 rounded-lg shadow-md hover:bg-red-50 transition-colors border-none cursor-pointer"
           title="حذف"
         >
@@ -154,5 +182,12 @@ const bookImageMap: Record<string, string> = {
     :isOpen="openUpdateBookModal"
     @close="openUpdateBookModal = false"
     @update="(updatedBooksList) => updateBooks?.(updatedBooksList.result)"
+  />
+  <RemoveConfirm
+    :isOpen="openRemoveBookModal"
+    :bookTitle="book.title"
+    :isLoading
+    @close="openRemoveBookModal = false"
+    @confirm="handleRemoveBook"
   />
 </template>
