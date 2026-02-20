@@ -4,14 +4,17 @@ import type { BookProps } from "../repository/book";
 import EditBook from "./icons/EditBook.vue";
 import RemoveBook from "./icons/RemoveBook.vue";
 import { convertToCategoryName } from "../helper/showCategory";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { User_GetRole } from "../repository/keyval/userRole";
 import type { UserRole } from "../repository/user";
+import UpdateBookModal from "./UpdateBookModal.vue";
 
 const { book } = defineProps<{
   book: BookProps;
   userRole: UserRole;
 }>();
+
+const openUpdateBookModal = ref(false);
 
 const bookImageMap: Record<string, string> = {
   "computer-programming-book":
@@ -51,6 +54,7 @@ const isAvailable = computed(() => book.availableCount > 0);
         </button>
         <button
           type="button"
+          @click="openUpdateBookModal = true"
           class="bg-white p-2 rounded-lg shadow-md hover:bg-blue-50 transition-colors border-none cursor-pointer"
           title="ویرایش"
         >
@@ -137,4 +141,10 @@ const isAvailable = computed(() => book.availableCount > 0);
         )} -->
     </div>
   </div>
+  <UpdateBookModal
+    dir="rtl"
+    :book
+    :isOpen="openUpdateBookModal"
+    @close="openUpdateBookModal = false"
+  />
 </template>
