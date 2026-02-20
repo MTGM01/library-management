@@ -3,12 +3,19 @@ import { computed, ref } from "vue";
 import Close from "./icons/Close.vue";
 import { Book, booksCategories, type Category } from "../repository/book";
 import CircleLoading from "./CircleLoading.vue";
+import { showToast } from "../helper/showToast";
+import type { API_Book_List_Output } from "../datasource/BookListAPI";
+
+const { isOpen, selectedCategory } = defineProps<{
+  isOpen: boolean;
+  selectedCategory?: Category;
+}>();
 
 const emit = defineEmits<{
   (event: "close"): void;
+  (event: "add", data: API_Book_List_Output): void;
 }>();
 
-const isOpen = defineModel({ default: false });
 const isLoading = ref(false);
 const title = ref("");
 const author = ref("");
@@ -17,18 +24,6 @@ const isbn = ref("");
 const total = ref(0);
 const description = ref("");
 const categories = computed(() => booksCategories);
-
-// export function AddBookModal({ categories, onClose, onAdd }: AddBookModalProps) {
-//   const [formData, setFormData] = useState({
-//     title: '',
-//     author: '',
-//     category: categories[0] || '',
-//     description: '',
-//     availableCopies: 1,
-//     totalCopies: 1,
-//     isbn: '',
-//     coverImage: 'classic-literature-book'
-//   });
 
 async function handleAddBook() {
   try {
@@ -40,9 +35,23 @@ async function handleAddBook() {
       category: category.value,
       total: total.value,
     });
-    isOpen.value = false;
+    const booksList = await Book.getList(selectedCategory ?? category.value);
+    emit("close");
+    emit("add", booksList);
+    showToast(
+      "success",
+      result.message === "The Book Added to Library Successfully"
+        ? "کتاب جدید با موفقیت به کتابخانه افزوده شد"
+        : result.message,
+    );
+    title.value = "";
+    author.value = "";
+    isbn.value = "";
+    category.value = "all";
+    total.value = 0;
   } catch (error) {
     console.error(error);
+    showToast("error", "خطایی رخ داده است !");
   } finally {
     isLoading.value = false;
   }

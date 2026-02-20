@@ -15,7 +15,7 @@ const { books } = defineProps<BookGridProps>();
 </script>
 
 <template>
-  <div v-if="books?.length === 0" class="text-center py-16">
+  <div v-if="books?.length === 0" class="text-center py-16 mx-auto w-full">
     <div class="text-gray-400 mb-4">
       <svg
         class="w-24 h-24 mx-auto"
