@@ -6,6 +6,7 @@ import LogOut from "./icons/LogOut.vue";
 import Search from "./icons/Search.vue";
 import UnknownUser from "./icons/UnknownUser.vue";
 import { useRouter } from "vue-router";
+import { User_SetRole } from "../repository/keyval/userRole";
 
 const { user } = defineProps<{
   user: User;
@@ -21,6 +22,7 @@ const router = useRouter();
 
 function changeUserRole(role: UserRole) {
   userRole.value = role;
+  User_SetRole(role);
 }
 
 function logout() {

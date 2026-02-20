@@ -1,18 +1,13 @@
 <script setup lang="ts">
-// import { Book, UserRole } from "../App";
 import BookCard from "./BookCard.vue";
 import type { BookProps } from "../repository/book";
 import BookNotFound from "./icons/BookNotFound.vue";
+import type { User } from "../repository/user";
 
-interface BookGridProps {
+const { books, user } = defineProps<{
   books: BookProps[] | null;
-  // userRole?: UserRole;
-  // onReserve: ?((bookId: string) => void);
-  // onDelete?: (bookId: string) => void;
-  // onEdit?: (bookId: string) => void;
-}
-
-const { books } = defineProps<BookGridProps>();
+  user: User;
+}>();
 </script>
 
 <template>
@@ -23,10 +18,11 @@ const { books } = defineProps<BookGridProps>();
   </div>
 
   <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <BookCard v-for="book in books" :key="book.ISBN" :book />
-    <!-- :userRole
-      :onReserve
-      :onDelete
-      :onEdit -->
+    <BookCard
+      v-for="book in books"
+      :key="book.ISBN"
+      :book
+      :userRole="user.userRole"
+    />
   </div>
 </template>

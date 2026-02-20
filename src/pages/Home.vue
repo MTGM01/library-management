@@ -33,7 +33,7 @@ watchEffect(async () => {
           <span>+</span>
           <span>افزودن کتاب جدید</span>
         </button>
-        <BookGrid :books />
+        <BookGrid :books :user />
       </div>
       <Sidebar
         @select="(categoryValue: Category) => (category = categoryValue)"
