@@ -39,15 +39,25 @@ watchEffect(async () => {
     <Header v-model="searchedBook" :user />
     <div class="flex grow justify-end">
       <div class="flex flex-col m-6 w-full">
-        <button
-          v-if="user.userRole === 'ADMIN'"
-          type="button"
-          class="w-fit flex items-center gap-2 px-6 py-3 mb-6 border-none bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
-          @click="openAddNewBookModal = true"
-        >
-          <span>+</span>
-          <span>افزودن کتاب جدید</span>
-        </button>
+        <div class="flex justify-between items-center mb-6">
+          <button
+            v-if="user.userRole === 'ADMIN'"
+            type="button"
+            class="w-fit flex items-center gap-2 px-6 py-3 border-none bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+            @click="openAddNewBookModal = true"
+          >
+            <span>+</span>
+            <span>افزودن کتاب جدید</span>
+          </button>
+          <div dir="rtl" class="flex flex-col text-right">
+            <h1 class="text-3xl font-bold mt-0 mb-2 text-gray-900">
+              کتابخانه دیجیتال
+            </h1>
+            <p class="text-gray-600 my-0">
+              {{ filteredBooks?.length }} کتاب یافت شد
+            </p>
+          </div>
+        </div>
         <BookGrid :books="filteredBooks" :user />
       </div>
       <Sidebar

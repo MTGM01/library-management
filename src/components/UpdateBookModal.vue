@@ -70,7 +70,7 @@ async function handleUpdateBook() {
       <div
         class="sticky top-0 bg-white border-b border-b-solid border-gray-200 px-6 py-4 flex items-center justify-between"
       >
-        <h2 class="text-xl my-0 font-bold text-gray-900">افزودن کتاب جدید</h2>
+        <h2 class="text-xl my-0 font-bold text-gray-900">ویرایش کتاب</h2>
         <button
           @click="emit('close')"
           class="p-6px hover:bg-gray-100 rounded-lg transition-colors border-none bg-transparent cursor-pointer"
