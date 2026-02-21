@@ -27,28 +27,28 @@ export interface UserProps {
 
 export class User {
   /** شناسه کاربر */
-  protected id: string;
+  id: string;
 
   /** نام کاربری */
-  protected userName: string;
+  userName: string;
 
   /** پسورد (توجه: در برنامه واقعی هرگز پسورد را به صورت plain ذخیره نکنید) */
-  protected password: string;
+  password: string;
 
   /** شماره موبایل */
-  protected mobile: string;
+  mobile: string;
 
   /** مبلغ جریمه */
-  protected crime: number;
+  crime: number;
 
   /** نقش کاربر */
-  protected role: UserRole;
+  role: UserRole;
 
   /** لیست کتاب های رزرو شده */
-  protected reservedBooks: Array<any>;
+  reservedBooks: Array<any>;
 
   /** پیغام های مربوط به درخواست های شیء یوزر */
-  protected message?: string;
+  message?: string;
 
   constructor(userData: UserProps) {
     this.id = userData._id;
@@ -114,7 +114,7 @@ export class User {
   }
 
   /** بررسی اعتبار پسورد */
-  private isValidPassword(password: string): boolean {
+  isValidPassword(password: string): boolean {
     return (
       password.length >= 8 &&
       /[a-zA-Z]/.test(password) &&
