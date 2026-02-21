@@ -9,6 +9,8 @@ import { User_SetProfile } from "./keyval/userProfile";
 export type UserRole = "ADMIN" | "USER";
 
 export interface UserProps {
+  /** شناسه کاربر */
+  _id: string;
   /** نام کاربری */
   userName: string;
   /** پسورد */
@@ -24,6 +26,9 @@ export interface UserProps {
 }
 
 export class User {
+  /** شناسه کاربر */
+  protected id: string;
+
   /** نام کاربری */
   protected userName: string;
 
@@ -45,14 +50,8 @@ export class User {
   /** پیغام های مربوط به درخواست های شیء یوزر */
   protected message?: string;
 
-  constructor(userData: {
-    userName: string;
-    password: string;
-    mobile: string;
-    crime?: number;
-    role: UserRole;
-    reservedBooks?: Array<any>;
-  }) {
+  constructor(userData: UserProps) {
+    this.id = userData._id;
     this.userName = userData.userName;
     this.password = userData.password; // در عمل باید هش شود
     this.mobile = userData.mobile;
@@ -79,6 +78,7 @@ export class User {
       const result = await API_User_Login(body);
       User_SetIsAuthenticated(true);
       User_SetProfile({
+        _id: result.result._id,
         userName: result.result.userName,
         password: result.result.password,
         mobile: result.result.mobile,
@@ -207,8 +207,9 @@ export class User {
   }
 
   /** ایجاد کاربر از روی JSON */
-  public static fromJSON(json: any): User {
+  public static fromJSON(json: UserProps): User {
     const user = new User({
+      _id: json._id,
       userName: json.userName,
       password: json.password || json.password || "", // در عمل پسورد هش شده است
       mobile: json.mobile,
@@ -255,10 +256,5 @@ export class User {
       isValid: errors.length === 0,
       errors,
     };
-  }
-
-  /** کلون کردن کاربر */
-  public clone(): User {
-    return User.fromJSON(this.toJSON());
   }
 }

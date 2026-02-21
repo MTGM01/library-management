@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, inject, ref, type Ref } from "vue";
 import Close from "./icons/Close.vue";
 import { Book, booksCategories, type Category } from "../repository/book";
 import CircleLoading from "./CircleLoading.vue";
@@ -24,6 +24,7 @@ const isbn = ref(book.ISBN);
 const total = ref(book.total);
 const availableCount = ref(book.availableCount);
 const description = ref(book.description);
+const selectedCategory = inject<Ref<Category>>("selectedCategory");
 const categories = computed(() => booksCategories);
 
 async function handleUpdateBook() {
@@ -39,7 +40,7 @@ async function handleUpdateBook() {
       category: category.value,
       description: description.value,
     });
-    const booksList = await Book.getList(book.category);
+    const booksList = await Book.getList(selectedCategory!.value);
     emit("close");
     emit("update", booksList);
     showToast(

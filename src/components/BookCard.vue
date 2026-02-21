@@ -5,22 +5,34 @@ import EditBook from "./icons/EditBook.vue";
 import RemoveBook from "./icons/RemoveBook.vue";
 import { convertToCategoryName } from "../helper/showCategory";
 import { computed, inject, ref, type Ref } from "vue";
-import type { UserRole } from "../repository/user";
+import type { UserProps, UserRole } from "../repository/user";
 import UpdateBookModal from "./UpdateBookModal.vue";
 import Calendar from "./icons/Calendar.vue";
 import RemoveConfirm from "./RemoveConfirm.vue";
 import { showToast } from "../helper/showToast";
+import CircleLoading from "./CircleLoading.vue";
+import {
+  User_GetProfile,
+  User_SetProfile,
+} from "../repository/keyval/userProfile";
 
 const { book, userRole } = defineProps<{
   book: BookProps;
   userRole: UserRole;
 }>();
 
+const userProfile = ref<UserProps>(User_GetProfile());
 const openUpdateBookModal = ref(false);
 const openRemoveBookModal = ref(false);
-const isLoading = ref(false);
+const isRemoveLoading = ref(false);
+const isReserveLoading = ref(false);
 const bookInstance = ref<Book>(new Book(book));
 const isAvailable = computed(() => book.availableCount > 0);
+const canNotReserve = computed(() =>
+  userProfile.value.reservedBooks.some(
+    (reservedBook) => reservedBook === book._id,
+  ),
+);
 const updateBooks =
   inject<(booksList: BookProps[] | null) => void>("updateList");
 const selectedCategory = inject<Ref<Category>>("selectedCategory");
@@ -41,7 +53,7 @@ const bookImageMap: Record<string, string> = {
 
 async function handleRemoveBook() {
   try {
-    isLoading.value = true;
+    isRemoveLoading.value = true;
     const result = await bookInstance.value.remove({
       id: bookInstance.value.id,
     });
@@ -57,7 +69,34 @@ async function handleRemoveBook() {
     console.error(error);
     showToast("error", "خطایی رخ داده است !");
   } finally {
-    isLoading.value = false;
+    isRemoveLoading.value = false;
+  }
+}
+
+async function handleReserveBook() {
+  try {
+    isReserveLoading.value = true;
+    const result = await bookInstance.value.reserve({
+      userID: User_GetProfile()._id,
+      bookID: bookInstance.value.id,
+    });
+    const booksList = await Book.getList(selectedCategory!.value);
+    userProfile.value.reservedBooks.push(bookInstance.value.id);
+    User_SetProfile({
+      ...userProfile.value,
+    });
+    updateBooks?.(booksList.result);
+    showToast(
+      "success",
+      result.message === "The Book Reserved Successfully"
+        ? "کتاب با موفقیت رزرو شد"
+        : result.message,
+    );
+  } catch (error) {
+    console.error(error);
+    showToast("error", "خطایی رخ داده است !");
+  } finally {
+    isReserveLoading.value = false;
   }
 }
 </script>
@@ -146,18 +185,29 @@ async function handleRemoveBook() {
 
       <button
         v-if="userRole === 'USER'"
-        class="flex items-center justify-center gap-2 w-full py-3 relative bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium cursor-pointer border-none"
+        class="flex items-center justify-center gap-2 w-full py-3 relative rounded-lg transition-colors font-medium border-none"
         :class="
-          isAvailable
-            ? 'bg-blue-600 text-white hover:bg-blue-700'
-            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+          !isAvailable || isReserveLoading || canNotReserve
+            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
         "
-        :disabled="!isAvailable"
+        @click="handleReserveBook"
+        :disabled="!isAvailable || isReserveLoading"
       >
         <Calendar class="w-4 h-4" />
         <span>
-          {{ isAvailable ? "رزرو کتاب" : "در حال حاضر موجود نیست" }}
+          {{
+            canNotReserve
+              ? "این کتاب قبلا رزرو شده است"
+              : isAvailable
+                ? "رزرو کتاب"
+                : "در حال حاضر موجود نیست"
+          }}
         </span>
+        <CircleLoading
+          v-if="isReserveLoading"
+          class="absolute inset-0 mx-auto right-32 top-2 w-6 h-6"
+        />
       </button>
 
       <div v-if="userRole === 'ADMIN'" class="bg-gray-50 p-3 rounded-lg">
@@ -186,7 +236,7 @@ async function handleRemoveBook() {
   <RemoveConfirm
     :isOpen="openRemoveBookModal"
     :bookTitle="book.title"
-    :isLoading
+    :isLoading="isRemoveLoading"
     @close="openRemoveBookModal = false"
     @confirm="handleRemoveBook"
   />

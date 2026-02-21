@@ -8,6 +8,10 @@ import {
   type API_Remove_Book_Input,
 } from "../datasource/DeleteBookAPI";
 import {
+  API_Reserve_Book,
+  type API_Reserve_Book_Input,
+} from "../datasource/ReserveBookAPI";
+import {
   API_Update_Book,
   type API_Update_Book_Input,
 } from "../datasource/UpdateBookAPI";
@@ -132,6 +136,10 @@ export class Book {
 
   static add(book: API_Add_Book_Input) {
     return API_Add_New_Book(book);
+  }
+
+  reserve(book: API_Reserve_Book_Input) {
+    return API_Reserve_Book(book);
   }
 
   update(book: API_Update_Book_Input) {
