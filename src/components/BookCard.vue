@@ -160,16 +160,25 @@ async function handleReserveBook() {
         >
           {{ convertToCategoryName(book.category) }}
         </span>
-        <h3 class="font-bold text-lg text-gray-900 mb-1 min-w-0 grow truncate">
+        <h3
+          :title="book.title"
+          class="font-bold text-lg text-gray-900 mb-1 min-w-0 grow truncate"
+        >
           {{ book.title }}
         </h3>
-        <p class="flex items-center gap-1 text-sm text-gray-600 mb-2">
+        <p
+          :title="book.author"
+          class="flex items-center gap-1 text-sm text-gray-600 mb-2"
+        >
           <span>نویسنده:</span>
           <span>
             {{ book.author }}
           </span>
         </p>
-        <p class="text-sm text-gray-500 my-0 min-h-5 min-w-0 grow truncate">
+        <p
+          :title="book.description"
+          class="text-sm text-gray-500 my-0 min-h-5 min-w-0 grow truncate"
+        >
           {{ book.description }}
         </p>
         <div
@@ -177,7 +186,7 @@ async function handleReserveBook() {
         >
           <div class="flex items-center gap-1">
             <span class="font-medium">ISBN:</span>
-            <span>{{ book.ISBN }}</span>
+            <span :title="book.ISBN">{{ book.ISBN }}</span>
           </div>
         </div>
       </div>
