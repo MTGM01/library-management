@@ -43,6 +43,7 @@ watchEffect(async () => {
         <BookGrid :books :user />
       </div>
       <Sidebar
+        :books
         @select="(categoryValue: Category) => (category = categoryValue)"
       />
     </div>

@@ -2,30 +2,34 @@
 import { computed, ref } from "vue";
 import Filter from "./icons/Filter.vue";
 import BookOpen from "./icons/BookOpen.vue";
-import { booksCategories, type Category } from "../repository/book";
+import {
+  booksCategories,
+  type BookProps,
+  type Category,
+} from "../repository/book";
 
-const categories = computed(() => booksCategories);
-
-const selectedCategory = ref("all");
+const { books } = defineProps<{
+  books: BookProps[] | null;
+}>();
 
 const emit = defineEmits<{
   (event: "select", value: Category): void;
 }>();
 
+const selectedCategory = ref("all");
+const categories = computed(() => booksCategories);
+const booksTotal = computed(() =>
+  books!.reduce((sum, book) => sum + book.total, 0),
+);
+const availableTotal = computed(() =>
+  books!.reduce((sum, book) => sum + book.availableCount, 0),
+);
+const reservedTotal = computed(() => booksTotal.value - availableTotal.value);
+
 function selectCategory(categoryValue: Category) {
   selectedCategory.value = categoryValue;
   emit("select", categoryValue);
 }
-// interface SidebarProps {
-//   categories: string[];
-//   selectedCategory: string;
-//   onCategoryChange: (category: string) => void;
-// }
-// export function Sidebar({ categories, selectedCategory, onCategoryChange }: SidebarProps) {
-//   return (
-
-//   );
-// }
 </script>
 
 <template>
@@ -54,21 +58,22 @@ function selectCategory(categoryValue: Category) {
       </nav>
 
       <div
+        dir="rtl"
         class="mt-8 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100"
       >
         <h3 class="font-bold text-gray-900 mb-3">آمار کتابخانه</h3>
         <div class="space-y-2 text-sm">
           <div class="flex justify-between">
             <span class="text-gray-600">مجموع کتاب‌ها:</span>
-            <span class="font-bold text-blue-600">1,250</span>
+            <span class="font-bold text-blue-600">{{ booksTotal }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-gray-600">رزرو شده:</span>
-            <span class="font-bold text-orange-600">234</span>
+            <span class="font-bold text-orange-600">{{ reservedTotal }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-gray-600">در دسترس:</span>
-            <span class="font-bold text-green-600">1,016</span>
+            <span class="font-bold text-green-600">{{ availableTotal }}</span>
           </div>
         </div>
       </div>

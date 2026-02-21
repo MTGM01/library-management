@@ -65,6 +65,10 @@ export class User {
     return this.password;
   }
 
+  get getMobile(): string {
+    return this.mobile;
+  }
+
   get userRole(): UserRole {
     return this.role;
   }

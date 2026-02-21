@@ -56,7 +56,7 @@ function logout() {
               <span class="text-sm font-medium text-gray-900">
                 {{ userRole === "ADMIN" ? "مدیر سیستم" : "کاربر عادی" }}
               </span>
-              <span class="text-xs text-gray-500">user@example.com</span>
+              <span class="text-xs text-gray-500">{{ user.getMobile }}</span>
             </div>
             <div class="h-9 w-1px bg-gray-200" />
           </div>
