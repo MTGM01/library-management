@@ -39,7 +39,15 @@ watchEffect(async () => {
     <Header v-model="searchedBook" :user />
     <div class="flex grow justify-end">
       <div class="flex flex-col m-6 w-full">
-        <div class="flex justify-between items-center mb-6">
+        <div dir="rtl" class="flex justify-between items-center mb-6">
+          <div class="flex flex-col text-right">
+            <h1 class="text-3xl font-bold mt-0 mb-2 text-gray-900">
+              کتابخانه دیجیتال
+            </h1>
+            <p class="text-gray-600 my-0">
+              {{ filteredBooks?.length }} کتاب یافت شد
+            </p>
+          </div>
           <button
             v-if="user.userRole === 'ADMIN'"
             type="button"
@@ -49,14 +57,6 @@ watchEffect(async () => {
             <span>+</span>
             <span>افزودن کتاب جدید</span>
           </button>
-          <div dir="rtl" class="flex flex-col text-right">
-            <h1 class="text-3xl font-bold mt-0 mb-2 text-gray-900">
-              کتابخانه دیجیتال
-            </h1>
-            <p class="text-gray-600 my-0">
-              {{ filteredBooks?.length }} کتاب یافت شد
-            </p>
-          </div>
         </div>
         <BookGrid :books="filteredBooks" :user />
       </div>

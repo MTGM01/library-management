@@ -38,7 +38,7 @@ function selectCategory(categoryValue: Category) {
   <aside class="w-64 bg-white border-l border-l-solid border-gray-200 p-6">
     <div class="sticky top-24">
       <div class="flex items-center justify-end gap-2 mb-6">
-        <h2 class="font-bold text-gray-900">دسته‌بندی‌ها</h2>
+        <h2 class="font-bold text-gray-900 my-0">دسته‌بندی‌ها</h2>
         <Filter class="w-5 h-5 text-gray-600" />
       </div>
 
@@ -47,7 +47,7 @@ function selectCategory(categoryValue: Category) {
           v-for="category in categories"
           :key="category.value"
           @click="selectCategory(category.value)"
-          class="w-full text-right px-4 py-3 rounded-lg transition-colors border-none outline-none bg-transparent flex items-center justify-end cursor-pointer gap-3"
+          class="w-full text-right text-16px px-4 py-3 rounded-lg transition-colors border-none outline-none bg-transparent flex items-center justify-end cursor-pointer gap-3"
           :class="
             selectedCategory === category.value
               ? 'bg-blue-50 text-blue-700 font-medium'

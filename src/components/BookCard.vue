@@ -154,13 +154,13 @@ async function handleReserveBook() {
     </div>
 
     <div>
-      <div class="mb-3 text-right">
+      <div class="flex flex-col mb-3 text-right">
         <span
-          class="inline-block mt-5 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-md mb-2"
+          class="inline-block w-fit mt-5 px-2 py-1 bg-blue-50 text-blue-700 text-sm rounded-md mb-2"
         >
           {{ convertToCategoryName(book.category) }}
         </span>
-        <h3 class="font-bold text-lg text-gray-900 mb-1 line-clamp-1">
+        <h3 class="font-bold text-lg text-gray-900 mb-1 min-w-0 grow truncate">
           {{ book.title }}
         </h3>
         <p class="flex items-center gap-1 text-sm text-gray-600 mb-2">
@@ -169,17 +169,16 @@ async function handleReserveBook() {
             {{ book.author }}
           </span>
         </p>
-        <p class="text-sm text-gray-500 line-clamp-2">
+        <p class="text-sm text-gray-500 my-0 min-h-5 min-w-0 grow truncate">
           {{ book.description }}
         </p>
-      </div>
-
-      <div
-        class="flex items-center gap-4 text-sm text-gray-600 mb-4 pb-4 border-b border-b-solid border-gray-100"
-      >
-        <div class="flex items-center gap-1">
-          <span class="font-medium">ISBN:</span>
-          <span class="text-xs">{{ book.ISBN }}</span>
+        <div
+          class="flex items-center text-sm text-gray-600 mb-4 mt-2 pb-4 border-b border-b-solid border-gray-100"
+        >
+          <div class="flex items-center gap-1">
+            <span class="font-medium">ISBN:</span>
+            <span>{{ book.ISBN }}</span>
+          </div>
         </div>
       </div>
 
