@@ -18,12 +18,14 @@ const emit = defineEmits<{
 
 const selectedCategory = ref("all");
 const categories = computed(() => booksCategories);
-const booksTotal = computed(() =>
-  books!.reduce((sum, book) => sum + book.total, 0),
-);
-const availableTotal = computed(() =>
-  books!.reduce((sum, book) => sum + book.availableCount, 0),
-);
+const booksTotal = computed(() => {
+  if (!books) return 0;
+  return books?.reduce((sum, book) => sum + book.total, 0);
+});
+const availableTotal = computed(() => {
+  if (!books) return 0;
+  return books?.reduce((sum, book) => sum + book.availableCount, 0);
+});
 const reservedTotal = computed(() => booksTotal.value - availableTotal.value);
 
 function selectCategory(categoryValue: Category) {

@@ -18,7 +18,10 @@ const userRole = computed({
     user.userRole = value;
   },
 });
+
 const router = useRouter();
+
+const searchedBook = defineModel();
 
 function changeUserRole(role: UserRole) {
   userRole.value = role;
@@ -89,12 +92,12 @@ function logout() {
 
         <div class="relative grow mx-8">
           <input
+            v-model="searchedBook"
             dir="rtl"
             type="search"
             placeholder="جستجوی کتاب بر اساس نام ..."
             class="w-full px-4 py-3 pr-12 rounded-lg bg-transparent border border-solid border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-          <!-- onChange={(e) => onSearch(e.target.value)} -->
           <Search
             class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
           />
@@ -106,8 +109,7 @@ function logout() {
               سیستم مدیریت کتابخانه
             </h1>
             <span class="text-xs text-right text-gray-500">
-              پنل کاربری
-              <!-- {userRole === 'admin' ? 'پنل مدیریت' : 'پنل کاربری'} -->
+              {{ userRole === "ADMIN" ? "پنل مدیریت" : "پنل کاربری" }}
             </span>
           </div>
           <div class="flex items-center bg-blue-600 p-2 rounded-lg">

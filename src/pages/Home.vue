@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { provide, ref, watchEffect } from "vue";
+import { computed, provide, ref, watchEffect } from "vue";
 import BookGrid from "../components/BookGrid.vue";
 import Footer from "../components/Footer.vue";
 import Header from "../components/Header.vue";
@@ -10,9 +10,17 @@ import { User_GetProfile } from "../repository/keyval/userProfile";
 import AddBookModal from "../components/AddBookModal.vue";
 
 const openAddNewBookModal = ref(false);
+const searchedBook = ref("");
 const books = ref<BookProps[] | null>(null);
 const category = ref<Category>("all");
 const user = ref<User>(new User(User_GetProfile()));
+const filteredBooks = computed(() => {
+  if (!books.value) return null;
+  if (!searchedBook.value.trim()) return books.value;
+  return books.value.filter((book) =>
+    book.title.toLowerCase().includes(searchedBook.value.toLowerCase()),
+  );
+});
 
 function updateList(booksList: BookProps[] | null) {
   books.value = booksList;
@@ -28,7 +36,7 @@ watchEffect(async () => {
 
 <template>
   <main class="flex flex-col w-full">
-    <Header :user />
+    <Header v-model="searchedBook" :user />
     <div class="flex grow justify-end">
       <div class="flex flex-col m-6 w-full">
         <button
@@ -40,7 +48,7 @@ watchEffect(async () => {
           <span>+</span>
           <span>افزودن کتاب جدید</span>
         </button>
-        <BookGrid :books :user />
+        <BookGrid :books="filteredBooks" :user />
       </div>
       <Sidebar
         :books
