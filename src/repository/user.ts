@@ -2,12 +2,13 @@ import {
   API_User_Login,
   type API_User_Login_Input,
 } from "../datasource/LoginAPI";
+import { API_Users_List } from "../datasource/UserAPI";
 import { showToast } from "../helper/showToast";
 import { User_SetIsAuthenticated } from "./keyval/userIsAuthenticated";
 import { User_SetProfile } from "./keyval/userProfile";
 
 export type UserRole = "ADMIN" | "USER";
-
+export type UserStatus = "ACTIVE" | "BLOCK";
 export interface UserProps {
   /** شناسه کاربر */
   _id: string;
@@ -23,6 +24,16 @@ export interface UserProps {
   role: UserRole;
   /** لیست کتاب های رزرو شده */
   reservedBooks: Array<any>;
+  /**تاریخ موعد */
+  dueDate: Date;
+  /** نام */
+  firstName: string;
+  /** نام خانوادگی */
+  lastName: string;
+  /** وضعیت */
+  status: UserStatus;
+  /** تاریخ ایجاد کاربر */
+  createdAt: Date;
 }
 
 export class User {
@@ -47,6 +58,21 @@ export class User {
   /** لیست کتاب های رزرو شده */
   reservedBooks: Array<any>;
 
+  /**تاریخ موعد */
+  dueDate: Date;
+
+  /** نام */
+  firstName: string;
+
+  /** نام خانوادگی */
+  lastName: string;
+
+  /** وضعیت */
+  status: UserStatus;
+
+  /** تاریخ ایجاد کاربر */
+  createdAt: Date;
+
   /** پیغام های مربوط به درخواست های شیء یوزر */
   message?: string;
 
@@ -58,6 +84,11 @@ export class User {
     this.crime = userData.crime || 0;
     this.role = userData.role;
     this.reservedBooks = userData.reservedBooks || [];
+    this.status = userData.status;
+    this.firstName = userData.firstName;
+    this.lastName = userData.lastName;
+    this.dueDate = userData.dueDate;
+    this.createdAt = userData.createdAt;
   }
 
   /** دریافت پسورد (با احتیاط استفاده شود) */
@@ -77,6 +108,10 @@ export class User {
     this.role = role;
   }
 
+  static getUsers() {
+    return API_Users_List();
+  }
+
   static async login(body: API_User_Login_Input) {
     try {
       const result = await API_User_Login(body);
@@ -89,6 +124,11 @@ export class User {
         role: result.result.role,
         crime: result.result.crime,
         reservedBooks: result.result.reservedBooks,
+        status: result.result.status,
+        firstName: result.result.firstName,
+        lastName: result.result.lastName,
+        dueDate: result.result.dueDate,
+        createdAt: result.result.createdAt,
       });
 
       if (result.message === "You are logged in successfully")
@@ -200,7 +240,7 @@ export class User {
   }
 
   /** دریافت اطلاعات کامل برای مدیریت */
-  public toJSON(): object {
+  toJSON(): object {
     return {
       userName: this.userName,
       mobile: this.mobile,
@@ -211,7 +251,7 @@ export class User {
   }
 
   /** ایجاد کاربر از روی JSON */
-  public static fromJSON(json: UserProps): User {
+  static fromJSON(json: UserProps): User {
     const user = new User({
       _id: json._id,
       userName: json.userName,
@@ -220,6 +260,11 @@ export class User {
       crime: json.crime,
       role: json.role,
       reservedBooks: json.reservedBooks || [],
+      status: json.status,
+      firstName: json.firstName,
+      lastName: json.lastName,
+      dueDate: json.dueDate,
+      createdAt: json.createdAt,
     });
 
     return user;

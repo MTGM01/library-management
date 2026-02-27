@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref, watchEffect } from "vue";
 import Header from "../components/Header.vue";
 import { User_GetProfile } from "../repository/keyval/userProfile";
 import { User } from "../repository/user";
 import Footer from "../components/Footer.vue";
-import UserManagement from "../components/icons/UserManagement.vue";
 import { useRouter } from "vue-router";
 import UserPlus from "../components/icons/UserPlus.vue";
+import UserManagement from "../components/icons/UserManagement.vue";
+import UserCheck from "../components/icons/UserCheck.vue";
+import UserCross from "../components/icons/UserCross.vue";
+import AlertCircle from "../components/icons/AlertCircle.vue";
 
 // import { useState, useEffect } from 'react';
 // import { useNavigate } from 'react-router';
@@ -18,7 +21,20 @@ import UserPlus from "../components/icons/UserPlus.vue";
 
 const router = useRouter();
 const user = ref<User>(new User(User_GetProfile()));
+const usersList = ref<User[]>([]);
+const activeUsersCount = computed(
+  () => usersList.value.filter((u) => u.status === "ACTIVE").length,
+);
+const reservationsCount = computed(() =>
+  usersList.value.reduce((sum, u) => sum + u.reservedBooks.length, 0),
+);
 
+watchEffect(async () => {
+  const plainUsers = (await User.getUsers()).result.filter(
+    (u) => u.role === "USER",
+  );
+  usersList.value = plainUsers.map((pu) => User.fromJSON(pu));
+});
 // export function UserManagement() {
 //   const navigate = useNavigate();
 //   const [searchQuery, setSearchQuery] = useState('');
@@ -140,43 +156,53 @@ const user = ref<User>(new User(User_GetProfile()));
           <div class="grid grid-cols-4 gap-4">
             <div class="bg-white p-6 rounded-xl border border-gray-200">
               <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-gray-600 text-sm mb-1">کل کاربران</p>
-                  <p class="text-3xl font-bold text-gray-900">{stats.total}</p>
+                <div class="flex flex-col">
+                  <span class="text-gray-600 text-sm mb-1">کل کاربران</span>
+                  <span class="text-3xl font-bold text-gray-900">
+                    {{ usersList.length }}
+                  </span>
                 </div>
-                <!-- <Users class="w-10 h-10 text-blue-600" /> -->
+                <UserManagement class="w-10 h-10 text-blue-600" />
               </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl border border-gray-200">
+            <div
+              class="bg-white p-6 rounded-xl border border-solid border-gray-200"
+            >
               <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-gray-600 text-sm mb-1">کاربران فعال</p>
-                  <p class="text-3xl font-bold text-green-600">
-                    {stats.active}
-                  </p>
+                <div class="flex flex-col">
+                  <span class="text-gray-600 text-sm mb-1">کاربران فعال</span>
+                  <span class="text-3xl font-bold text-green-600">
+                    {{ activeUsersCount }}
+                  </span>
                 </div>
                 <UserCheck class="w-10 h-10 text-green-600" />
               </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl border border-gray-200">
+            <div
+              class="bg-white p-6 rounded-xl border border-solid border-gray-200"
+            >
               <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-gray-600 text-sm mb-1">کاربران مسدود</p>
-                  <p class="text-3xl font-bold text-red-600">{stats.blocked}</p>
+                <div class="flex flex-col">
+                  <span class="text-gray-600 text-sm mb-1">کاربران مسدود</span>
+                  <span class="text-3xl font-bold text-red-600">
+                    {{ usersList.length - activeUsersCount }}
+                  </span>
                 </div>
-                <UserX class="w-10 h-10 text-red-600" />
+                <UserCross class="w-10 h-10 text-red-600" />
               </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl border border-gray-200">
+            <div
+              class="bg-white p-6 rounded-xl border border-solid border-gray-200"
+            >
               <div class="flex items-center justify-between">
-                <div>
-                  <p class="text-gray-600 text-sm mb-1">رزروهای فعال</p>
-                  <p class="text-3xl font-bold text-orange-600">
-                    {stats.totalReservations}
-                  </p>
+                <div class="flex flex-col">
+                  <span class="text-gray-600 text-sm mb-1">رزروهای فعال</span>
+                  <span class="text-3xl font-bold text-orange-600">
+                    {{ reservationsCount }}
+                  </span>
                 </div>
                 <AlertCircle class="w-10 h-10 text-orange-600" />
               </div>
