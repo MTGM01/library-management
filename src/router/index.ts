@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "../pages/Home.vue";
 import Login from "../pages/Login.vue"; // صفحه لاگین رو import کنید
+import Users from "../pages/Users.vue";
+import UserDetail from "../pages/UserDetail.vue";
+import MyReservations from "../pages/MyReservations.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -16,6 +19,23 @@ const router = createRouter({
       name: "login",
       component: Login,
       meta: { requiresAuth: false }, // صفحه لاگین نیاز به احراز هویت ندارد
+    },
+    {
+      path: "/users",
+      name: "users",
+      component: Users,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/users/:userId",
+      component: UserDetail,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/my-reservations",
+      name: "my-reservations",
+      component: MyReservations,
+      meta: { requiresAuth: true },
     },
   ],
 });
