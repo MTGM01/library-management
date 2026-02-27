@@ -255,7 +255,7 @@ export class User {
     const user = new User({
       _id: json._id,
       userName: json.userName,
-      password: json.password || json.password || "", // در عمل پسورد هش شده است
+      password: json.password,
       mobile: json.mobile,
       crime: json.crime,
       role: json.role,

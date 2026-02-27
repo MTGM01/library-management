@@ -23,7 +23,7 @@ const filteredBooks = computed(() => {
   if (!books.value) return null;
   if (!searchedBook.value.trim()) return books.value;
   return books.value.filter((book) =>
-    book.title.toLowerCase().includes(searchedBook.value.toLowerCase()),
+    book.title.toLowerCase().includes(searchedBook.value.trim().toLowerCase()),
   );
 });
 

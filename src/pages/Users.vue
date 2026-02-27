@@ -12,6 +12,7 @@ import AlertCircle from "../components/icons/AlertCircle.vue";
 import Search from "../components/icons/Search.vue";
 import Eye from "../components/icons/Eye.vue";
 import UserManagement from "../components/icons/UserManagement.vue";
+import { convertISOToJalali } from "../utils/convertDate";
 
 // import { useState, useEffect } from 'react';
 // import { useNavigate } from 'react-router';
@@ -25,13 +26,23 @@ const router = useRouter();
 const user = ref<User>(new User(User_GetProfile()));
 const usersList = ref<User[]>([]);
 const searchedUser = ref("");
+const statusFilter = ref<"ALL" | "ACTIVE" | "BLOCK">("ALL");
 const filteredUsers = computed(() => {
   if (!usersList.value) return null;
-  if (!searchedUser.value.trim()) return usersList.value;
+  if (!searchedUser.value.trim() && statusFilter.value === "ALL")
+    return usersList.value;
   return usersList.value.filter(
     (u) =>
-      u.firstName.toLowerCase().includes(searchedUser.value.toLowerCase()) ||
-      u.lastName.toLowerCase().includes(searchedUser.value.toLowerCase()),
+      (u.firstName
+        .toLowerCase()
+        .includes(searchedUser.value.trim().toLowerCase()) &&
+        u.status.replace(/[\u200B-\u200D\uFEFF]/g, "").trim() ===
+          statusFilter.value) ||
+      (u.lastName
+        .toLowerCase()
+        .includes(searchedUser.value.trim().toLowerCase()) &&
+        u.status.replace(/[\u200B-\u200D\uFEFF]/g, "").trim() ===
+          statusFilter.value),
   );
 });
 const activeUsersCount = computed(
@@ -47,10 +58,13 @@ watchEffect(async () => {
   );
   usersList.value = plainUsers.map((pu) => User.fromJSON(pu));
 });
+
+function setStatusFilter(status: "ALL" | "ACTIVE" | "BLOCK") {
+  statusFilter.value = status;
+}
 // export function UserManagement() {
 //   const navigate = useNavigate();
 //   const [searchQuery, setSearchQuery] = useState('');
-//   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'blocked'>('all');
 //   const [users, setUsers] = useState<User[]>(mockUsers);
 //   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 
@@ -241,31 +255,40 @@ watchEffect(async () => {
             </div>
 
             <div class="flex gap-2 bg-gray-100 p-1 rounded-lg">
-              <button>
-                <!-- class={`px-4 py-2 rounded text-sm transition-colors ${
-                  statusFilter === 'all'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-                }`} -->
-                <!-- onClick={() => setStatusFilter('all')} -->
+              <button
+                type="button"
+                class="px-4 py-2 rounded text-sm transition-colors bg-transparent border-none cursor-pointer"
+                :class="
+                  statusFilter === 'ALL'
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                "
+                @click="setStatusFilter('ALL')"
+              >
                 همه
               </button>
-              <button>
-                <!-- class={`px-4 py-2 rounded text-sm transition-colors ${
-                  statusFilter === 'active'
-                  ? 'bg-white text-green-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-                }`} -->
-                <!-- onClick={() => setStatusFilter('active')} -->
+              <button
+                type="button"
+                class="px-4 py-2 rounded text-sm transition-colors bg-transparent border-none cursor-pointer"
+                :class="
+                  statusFilter === 'ACTIVE'
+                    ? 'bg-white text-green-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                "
+                @click="setStatusFilter('ACTIVE')"
+              >
                 فعال
               </button>
-              <button>
-                <!-- class={`px-4 py-2 rounded text-sm transition-colors ${
-                  statusFilter === 'blocked'
-                  ? 'bg-white text-red-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-                }`} -->
-                <!-- onClick={() => setStatusFilter('blocked')} -->
+              <button
+                type="button"
+                class="px-4 py-2 rounded text-sm transition-colors bg-transparent border-none cursor-pointer"
+                :class="
+                  statusFilter === 'BLOCK'
+                    ? 'bg-white text-red-600 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                "
+                @click="setStatusFilter('BLOCK')"
+              >
                 مسدود شده
               </button>
             </div>
@@ -335,11 +358,7 @@ watchEffect(async () => {
                     {{ filteredUser.mobile }}
                   </td>
                   <td class="px-6 py-4 text-gray-600">
-                    {{
-                      new Date(filteredUser.createdAt).toLocaleDateString(
-                        "fa-IR",
-                      )
-                    }}
+                    {{ convertISOToJalali(filteredUser.createdAt) }}
                   </td>
                   <td class="px-6 py-4">
                     <span
