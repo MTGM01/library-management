@@ -6,10 +6,12 @@ import { User } from "../repository/user";
 import Footer from "../components/Footer.vue";
 import { useRouter } from "vue-router";
 import UserPlus from "../components/icons/UserPlus.vue";
-import UserManagement from "../components/icons/UserManagement.vue";
 import UserCheck from "../components/icons/UserCheck.vue";
 import UserCross from "../components/icons/UserCross.vue";
 import AlertCircle from "../components/icons/AlertCircle.vue";
+import Search from "../components/icons/Search.vue";
+import Eye from "../components/icons/Eye.vue";
+import UserManagement from "../components/icons/UserManagement.vue";
 
 // import { useState, useEffect } from 'react';
 // import { useNavigate } from 'react-router';
@@ -22,6 +24,16 @@ import AlertCircle from "../components/icons/AlertCircle.vue";
 const router = useRouter();
 const user = ref<User>(new User(User_GetProfile()));
 const usersList = ref<User[]>([]);
+const searchedUser = ref("");
+const filteredUsers = computed(() => {
+  if (!usersList.value) return null;
+  if (!searchedUser.value.trim()) return usersList.value;
+  return usersList.value.filter(
+    (u) =>
+      u.firstName.toLowerCase().includes(searchedUser.value.toLowerCase()) ||
+      u.lastName.toLowerCase().includes(searchedUser.value.toLowerCase()),
+  );
+});
 const activeUsersCount = computed(
   () => usersList.value.filter((u) => u.status === "ACTIVE").length,
 );
@@ -154,7 +166,9 @@ watchEffect(async () => {
           </div>
 
           <div class="grid grid-cols-4 gap-4">
-            <div class="bg-white p-6 rounded-xl border border-gray-200">
+            <div
+              class="bg-white p-6 rounded-xl border border-solid border-gray-200"
+            >
               <div class="flex items-center justify-between">
                 <div class="flex flex-col">
                   <span class="text-gray-600 text-sm mb-1">کل کاربران</span>
@@ -210,24 +224,22 @@ watchEffect(async () => {
           </div>
         </div>
 
-        {/* فیلترها و جستجو */}
-        <div class="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-          <div class="flex gap-4 items-center">
-            {/* جستجو */}
+        <div
+          class="bg-white rounded-xl border border-solid border-gray-200 p-6 mb-6"
+        >
+          <div class="flex items-center gap-4">
             <div class="flex-1 relative">
               <input
-                type="text"
-                placeholder="جستجو بر اساس نام، ایمیل یا شماره تماس..."
-                value="{searchQuery}"
-                class="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                type="search"
+                placeholder="جستجو بر اساس نام ..."
+                v-model="searchedUser"
+                class="w-93% px-4 py-3 pr-12 rounded-lg border border-solid border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <!-- onChange={(e) => setSearchQuery(e.target.value)} -->
               <Search
                 class="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
               />
             </div>
 
-            {/* فیلتر وضعیت */}
             <div class="flex gap-2 bg-gray-100 p-1 rounded-lg">
               <button>
                 <!-- class={`px-4 py-2 rounded text-sm transition-colors ${
@@ -260,21 +272,17 @@ watchEffect(async () => {
           </div>
         </div>
 
-        {/* جدول کاربران */}
-        <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div
+          class="bg-white rounded-xl border border-solid border-gray-200 overflow-hidden"
+        >
           <div class="overflow-x-auto">
             <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
+              <thead class="bg-gray-50 border-b border-b-solid border-gray-200">
                 <tr>
                   <th
                     class="px-6 py-4 text-right text-sm font-bold text-gray-900"
                   >
                     نام کاربر
-                  </th>
-                  <th
-                    class="px-6 py-4 text-right text-sm font-bold text-gray-900"
-                  >
-                    ایمیل
                   </th>
                   <th
                     class="px-6 py-4 text-right text-sm font-bold text-gray-900"
@@ -304,82 +312,101 @@ watchEffect(async () => {
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
-                <!-- {filteredUsers.map((user) => ( -->
-                <tr key="{user.id}" class="hover:bg-gray-50 transition-colors">
+                <tr
+                  v-for="filteredUser in filteredUsers"
+                  :key="filteredUser.id"
+                  class="hover:bg-gray-50 transition-colors"
+                >
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
                       <div
                         class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center"
                       >
                         <span class="text-blue-600 font-bold">
-                          {user.name.charAt(0)}
+                          {{ filteredUser.firstName.charAt(0) }}
                         </span>
                       </div>
-                      <span class="font-medium text-gray-900">{user.name}</span>
+                      <span class="font-medium text-gray-900">
+                        {{ filteredUser.firstName }} {{ filteredUser.lastName }}
+                      </span>
                     </div>
                   </td>
-                  <td class="px-6 py-4 text-gray-600">{user.email}</td>
-                  <td class="px-6 py-4 text-gray-600" dir="ltr">
-                    {user.phone}
+                  <td class="px-6 py-4 text-gray-600">
+                    {{ filteredUser.mobile }}
                   </td>
-                  <td class="px-6 py-4 text-gray-600">{user.joinDate}</td>
+                  <td class="px-6 py-4 text-gray-600">
+                    {{
+                      new Date(filteredUser.createdAt).toLocaleDateString(
+                        "fa-IR",
+                      )
+                    }}
+                  </td>
                   <td class="px-6 py-4">
-                    <span>
-                      <!-- class={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                          user.activeReservations > 0
-                            ? 'bg-orange-100 text-orange-700'
-                            : 'bg-gray-100 text-gray-600'
-                        }`} -->
-                      {user.activeReservations} کتاب
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                      :class="
+                        filteredUser.reservedBooks.length > 0
+                          ? 'bg-orange-100 text-orange-700'
+                          : 'bg-gray-100 text-gray-600'
+                      "
+                    >
+                      {{ filteredUser.reservedBooks.length }} کتاب
                     </span>
                   </td>
                   <td class="px-6 py-4">
-                    <span>
-                      <!-- class={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                          user.status === 'active'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
-                        }`} -->
-                      {user.status === 'active' ? 'فعال' : 'مسدود'}
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                      :class="
+                        filteredUser.status === 'ACTIVE'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      "
+                    >
+                      {{ filteredUser.status === "ACTIVE" ? "فعال" : "مسدود" }}
                     </span>
                   </td>
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-2">
                       <button
-                        class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        type="button"
+                        class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border-none bg-transparent cursor-pointer"
                         title="مشاهده جزئیات"
                       >
                         <!-- onClick={() => handleViewUser(user.id)} -->
                         <Eye class="w-5 h-5" />
                       </button>
-                      <button>
-                        <!-- :title={user.status === 'active' ? 'مسدود کردن' : 'فعال کردن'} -->
-                        <!-- onClick={() => handleToggleUserStatus(user.id)}
-                          class={`p-2 rounded-lg transition-colors ${
-                            user.status === 'active'
-                              ? 'text-red-600 hover:bg-red-50'
-                              : 'text-green-600 hover:bg-green-50'
-                          }`} -->
-                        {user.status === 'active' ? (
-                        <UserX class="w-5 h-5" />
-                        ) : (
-                        <UserCheck class="w-5 h-5" />
-                        )}
+                      <button
+                        type="button"
+                        class="p-2 rounded-lg transition-colors bg-transparent border-none cursor-pointer"
+                        :class="
+                          filteredUser.status === 'ACTIVE'
+                            ? ' text-green-600 hover:bg-green-50'
+                            : 'text-red-600 hover:bg-red-50'
+                        "
+                        :title="
+                          filteredUser.status === 'ACTIVE'
+                            ? 'فعال کردن'
+                            : 'مسدود کردن'
+                        "
+                      >
+                        <!-- onClick={() => handleToggleUserStatus(user.id)} -->
+                        <UserCheck
+                          v-if="filteredUser.status === 'ACTIVE'"
+                          class="w-5 h-5"
+                        />
+                        <UserCross v-else class="w-5 h-5" />
                       </button>
                     </div>
                   </td>
                 </tr>
-                <!-- ))} -->
               </tbody>
             </table>
           </div>
 
-          <!-- {filteredUsers.length === 0 && ( -->
-          <div class="text-center py-12">
-            <!-- <Users class="w-16 h-16 text-gray-300 mx-auto mb-4" /> -->
+          <div v-if="!filteredUsers?.length" class="text-center py-12">
+            <UserManagement class="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p class="text-gray-500">کاربری یافت نشد</p>
           </div>
-          <!-- )} -->
         </div>
       </div>
     </section>
