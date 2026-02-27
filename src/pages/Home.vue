@@ -9,12 +9,16 @@ import { User } from "../repository/user";
 import { User_GetProfile } from "../repository/keyval/userProfile";
 import AddBookModal from "../components/AddBookModal.vue";
 import UserManagement from "../components/icons/UserManagement.vue";
+import { RouterLink } from "vue-router";
+import { User_GetRole } from "../repository/keyval/userRole";
 
 const openAddNewBookModal = ref(false);
 const searchedBook = ref("");
 const books = ref<BookProps[] | null>(null);
 const category = ref<Category>("all");
-const user = ref<User>(new User(User_GetProfile()));
+const user = ref<User>(
+  new User({ ...User_GetProfile(), role: User_GetRole() }),
+);
 const filteredBooks = computed(() => {
   if (!books.value) return null;
   if (!searchedBook.value.trim()) return books.value;
@@ -27,6 +31,7 @@ function updateList(booksList: BookProps[] | null) {
   books.value = booksList;
 }
 
+provide("user", user);
 provide("updateList", updateList);
 provide("selectedCategory", category);
 
@@ -50,13 +55,15 @@ watchEffect(async () => {
             </p>
           </div>
           <div class="flex items-center gap-3" v-if="user.userRole === 'ADMIN'">
-            <button
-              type="button"
-              class="bg-white border-2 border-solid border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 cursor-pointer"
-            >
-              <UserManagement class="w-5 h-5" />
-              <span>مدیریت کاربران</span>
-            </button>
+            <RouterLink to="/users" class="decoration-none">
+              <button
+                type="button"
+                class="bg-white border-2 border-solid border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 cursor-pointer"
+              >
+                <UserManagement class="w-5 h-5" />
+                <span>مدیریت کاربران</span>
+              </button>
+            </RouterLink>
             <button
               type="button"
               class="w-fit flex items-center gap-2 px-6 py-3 border-none bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"

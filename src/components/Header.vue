@@ -8,8 +8,9 @@ import UnknownUser from "./icons/UnknownUser.vue";
 import { useRouter } from "vue-router";
 import { User_SetRole } from "../repository/keyval/userRole";
 
-const { user } = defineProps<{
+const { user, noSearch = false } = defineProps<{
   user: User;
+  noSearch?: boolean;
 }>();
 
 const userRole = computed({
@@ -23,9 +24,14 @@ const router = useRouter();
 
 const searchedBook = defineModel();
 
+const emit = defineEmits<{
+  (event: "changeRole", role: UserRole): void;
+}>();
+
 function changeUserRole(role: UserRole) {
   userRole.value = role;
   User_SetRole(role);
+  emit("changeRole", role);
 }
 
 function logout() {
@@ -90,7 +96,7 @@ function logout() {
           </div>
         </div>
 
-        <div class="relative grow mx-8">
+        <div class="relative grow mx-8" :class="{ invisible: noSearch }">
           <input
             v-model="searchedBook"
             dir="rtl"

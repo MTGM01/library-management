@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { BookOpen, CheckCircle, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
@@ -319,4 +319,5 @@ export function MyReservations() {
       </section>
 
     </div>
-</template>
+</template> -->
+<template></template>

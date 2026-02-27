@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { ArrowRight, User as UserIcon, Mail, Phone, Calendar, BookOpen, CheckCircle, Clock, XCircle, AlertTriangle, DollarSign } from 'lucide-react';
@@ -467,4 +467,5 @@ export function UserDetail() {
           
           <Footer />
         </div>
-      </template>
+      </template> -->
+<template></template>
