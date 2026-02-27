@@ -8,6 +8,7 @@ import Sidebar from "../components/Sidebar.vue";
 import { User } from "../repository/user";
 import { User_GetProfile } from "../repository/keyval/userProfile";
 import AddBookModal from "../components/AddBookModal.vue";
+import UserManagement from "../components/icons/UserManagement.vue";
 
 const openAddNewBookModal = ref(false);
 const searchedBook = ref("");
@@ -48,15 +49,24 @@ watchEffect(async () => {
               {{ filteredBooks?.length }} کتاب یافت شد
             </p>
           </div>
-          <button
-            v-if="user.userRole === 'ADMIN'"
-            type="button"
-            class="w-fit flex items-center gap-2 px-6 py-3 border-none bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
-            @click="openAddNewBookModal = true"
-          >
-            <span>+</span>
-            <span>افزودن کتاب جدید</span>
-          </button>
+          <div class="flex items-center gap-3">
+            <button
+              type="button"
+              class="bg-white border-2 border-solid border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              <UserManagement class="w-5 h-5" />
+              <span>مدیریت کاربران</span>
+            </button>
+            <button
+              v-if="user.userRole === 'ADMIN'"
+              type="button"
+              class="w-fit flex items-center gap-2 px-6 py-3 border-none bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+              @click="openAddNewBookModal = true"
+            >
+              <span>+</span>
+              <span>افزودن کتاب جدید</span>
+            </button>
+          </div>
         </div>
         <BookGrid :books="filteredBooks" :user />
       </div>

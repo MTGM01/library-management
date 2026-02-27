@@ -5,7 +5,6 @@
     stroke-linecap="round"
     stroke-linejoin="round"
     stroke-width="2"
-    data-fg-bi6b35="79.11:79.6526:/components/Login.tsx:118:21:4739:30:e:EyeOff::::::6Hc"
     viewBox="0 0 24 24"
   >
     <path

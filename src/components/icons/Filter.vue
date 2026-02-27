@@ -5,7 +5,6 @@
     stroke-linecap="round"
     stroke-linejoin="round"
     stroke-width="2"
-    data-fg-d1zo4="1.10:1.2188:/components/Sidebar.tsx:15:11:473:44:e:Filter::::::BVUM"
     viewBox="0 0 24 24"
   >
     <path

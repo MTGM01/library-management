@@ -5,7 +5,6 @@
     stroke-linecap="round"
     stroke-linejoin="round"
     stroke-width="2"
-    data-fg-d3tn39="1.15:1.2588:/components/Footer.tsx:50:17:2003:43:e:Phone::::::DmpI"
     viewBox="0 0 24 24"
   >
     <path
