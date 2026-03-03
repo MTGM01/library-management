@@ -5,7 +5,7 @@ import Footer from "../components/Footer.vue";
 import Header from "../components/Header.vue";
 import { Book, type Category, type BookProps } from "../repository/book";
 import Sidebar from "../components/Sidebar.vue";
-import { User } from "../repository/user";
+import { User, type UserRole } from "../repository/user";
 import { User_GetProfile } from "../repository/keyval/userProfile";
 import AddBookModal from "../components/AddBookModal.vue";
 import UserManagement from "../components/icons/UserManagement.vue";
@@ -16,9 +16,8 @@ const openAddNewBookModal = ref(false);
 const searchedBook = ref("");
 const books = ref<BookProps[] | null>(null);
 const category = ref<Category>("all");
-const user = ref<User>(
-  new User({ ...User_GetProfile(), role: User_GetRole() }),
-);
+const user = ref<User>(new User(User_GetProfile()));
+const userRole = ref<UserRole>(User_GetRole());
 const filteredBooks = computed(() => {
   if (!books.value) return null;
   if (!searchedBook.value.trim()) return books.value;
@@ -32,6 +31,7 @@ function updateList(booksList: BookProps[] | null) {
 }
 
 provide("user", user);
+provide("userRole", userRole);
 provide("updateList", updateList);
 provide("selectedCategory", category);
 
@@ -42,7 +42,13 @@ watchEffect(async () => {
 
 <template>
   <main class="flex flex-col w-full">
-    <Header v-model="searchedBook" :user />
+    <Header
+      :show-switch-role="user.userRole === 'ADMIN'"
+      :user-role="userRole"
+      :mobile="user.getMobile"
+      v-model="searchedBook"
+      @change-role="(role) => (userRole = role)"
+    />
     <div class="flex grow justify-end">
       <div class="flex flex-col m-6 w-full">
         <div dir="rtl" class="flex justify-between items-center mb-6">
@@ -54,7 +60,7 @@ watchEffect(async () => {
               {{ filteredBooks?.length }} کتاب یافت شد
             </p>
           </div>
-          <div class="flex items-center gap-3" v-if="user.userRole === 'ADMIN'">
+          <div class="flex items-center gap-3" v-if="userRole === 'ADMIN'">
             <RouterLink to="/users" class="decoration-none">
               <button
                 type="button"

@@ -16,11 +16,11 @@ import {
   User_SetProfile,
 } from "../repository/keyval/userProfile";
 
-const { book, userRole } = defineProps<{
+const { book } = defineProps<{
   book: BookProps;
-  userRole: UserRole;
 }>();
 
+const userRole = inject<UserRole>("userRole");
 const userProfile = ref<UserProps>(User_GetProfile());
 const openUpdateBookModal = ref(false);
 const openRemoveBookModal = ref(false);
@@ -33,6 +33,7 @@ const canNotReserve = computed(() =>
     (reservedBook) => reservedBook === book._id,
   ),
 );
+
 const updateBooks =
   inject<(booksList: BookProps[] | null) => void>("updateList");
 const selectedCategory = inject<Ref<Category>>("selectedCategory");

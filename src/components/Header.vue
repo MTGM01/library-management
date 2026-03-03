@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import type { User, UserRole } from "../repository/user";
+import type { UserRole } from "../repository/user";
 import BookOpen from "./icons/BookOpen.vue";
 import LogOut from "./icons/LogOut.vue";
 import Search from "./icons/Search.vue";
@@ -8,17 +7,17 @@ import UnknownUser from "./icons/UnknownUser.vue";
 import { useRouter } from "vue-router";
 import { User_SetRole } from "../repository/keyval/userRole";
 
-const { user, noSearch = false } = defineProps<{
-  user: User;
+const {
+  mobile,
+  noSearch = false,
+  userRole,
+  showSwitchRole,
+} = defineProps<{
+  mobile: string;
+  userRole: UserRole;
+  showSwitchRole: boolean;
   noSearch?: boolean;
 }>();
-
-const userRole = computed({
-  get: () => user.userRole,
-  set: (value: UserRole) => {
-    user.userRole = value;
-  },
-});
 
 const router = useRouter();
 
@@ -29,7 +28,6 @@ const emit = defineEmits<{
 }>();
 
 function changeUserRole(role: UserRole) {
-  userRole.value = role;
   User_SetRole(role);
   emit("changeRole", role);
 }
@@ -65,14 +63,17 @@ function logout() {
               <span class="text-sm font-medium text-gray-900">
                 {{ userRole === "ADMIN" ? "مدیر سیستم" : "کاربر عادی" }}
               </span>
-              <span class="text-xs text-gray-500">{{ user.getMobile }}</span>
+              <span class="text-xs text-gray-500">{{ mobile }}</span>
             </div>
             <div class="h-9 w-1px bg-gray-200" />
           </div>
 
-          <div class="flex gap-2 bg-gray-100 p-1 rounded-lg">
+          <div
+            v-if="showSwitchRole"
+            class="flex gap-2 bg-gray-100 p-1 rounded-lg"
+          >
             <button
-              class="px-3 py-1.5 rounded text-sm transition-colors border-none outline-none bg-transparent"
+              class="px-3 py-1.5 rounded text-sm transition-colors border-none outline-none bg-transparent cursor-pointer"
               :class="
                 userRole === 'USER'
                   ? 'bg-white text-blue-600 shadow-sm'
@@ -83,7 +84,7 @@ function logout() {
               کاربر
             </button>
             <button
-              class="px-3 py-1.5 rounded text-sm transition-colors bg-transparent outline-none border-none"
+              class="px-3 py-1.5 rounded text-sm transition-colors bg-transparent outline-none border-none cursor-pointer"
               :class="
                 userRole === 'ADMIN'
                   ? 'bg-white text-blue-600 shadow-sm'

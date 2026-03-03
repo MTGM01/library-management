@@ -2,11 +2,9 @@
 import BookCard from "./BookCard.vue";
 import type { BookProps } from "../repository/book";
 import BookNotFound from "./icons/BookNotFound.vue";
-import type { User } from "../repository/user";
 
-const { books, user } = defineProps<{
+const { books } = defineProps<{
   books: BookProps[] | null;
-  user: User;
 }>();
 </script>
 
@@ -18,11 +16,6 @@ const { books, user } = defineProps<{
   </div>
 
   <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <BookCard
-      v-for="book in books"
-      :key="book.ISBN"
-      :book
-      :userRole="user.userRole"
-    />
+    <BookCard v-for="book in books" :key="book.ISBN" :book />
   </div>
 </template>

@@ -6,6 +6,7 @@ import { API_Users_List } from "../datasource/UserAPI";
 import { showToast } from "../helper/showToast";
 import { User_SetIsAuthenticated } from "./keyval/userIsAuthenticated";
 import { User_SetProfile } from "./keyval/userProfile";
+import { User_SetRole } from "./keyval/userRole";
 
 export type UserRole = "ADMIN" | "USER";
 export type UserStatus = "ACTIVE" | "BLOCK";
@@ -104,10 +105,6 @@ export class User {
     return this.role;
   }
 
-  set userRole(role: UserRole) {
-    this.role = role;
-  }
-
   static getUsers() {
     return API_Users_List();
   }
@@ -130,7 +127,7 @@ export class User {
         dueDate: result.result.dueDate,
         createdAt: result.result.createdAt,
       });
-
+      User_SetRole(result.result.role);
       if (result.message === "You are logged in successfully")
         showToast("success", "با موفقیت وارد شدید");
     } catch (error: any) {

@@ -13,6 +13,7 @@ import Search from "../components/icons/Search.vue";
 import Eye from "../components/icons/Eye.vue";
 import UserManagement from "../components/icons/UserManagement.vue";
 import { convertISOToJalali } from "../utils/convertDate";
+import { User_GetRole } from "../repository/keyval/userRole";
 
 // import { useState, useEffect } from 'react';
 // import { useNavigate } from 'react-router';
@@ -141,7 +142,14 @@ function setStatusFilter(status: "ALL" | "ACTIVE" | "BLOCK") {
 
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50" dir="rtl">
-    <Header dir="ltr" :user :no-search="true" @changeRole="router.back()" />
+    <Header
+      dir="ltr"
+      :show-switch-role="user.userRole === 'ADMIN'"
+      :user-role="User_GetRole()"
+      :mobile="user.getMobile"
+      :no-search="true"
+      @change-role="router.back()"
+    />
 
     <section class="flex-1 p-6">
       <div class="max-w-7xl mx-auto">
