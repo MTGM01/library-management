@@ -63,81 +63,6 @@ watchEffect(async () => {
 function setStatusFilter(status: "ALL" | "ACTIVE" | "BLOCK") {
   statusFilter.value = status;
 }
-// export function UserManagement() {
-//   const navigate = useNavigate();
-//   const [searchQuery, setSearchQuery] = useState('');
-//   const [users, setUsers] = useState<User[]>(mockUsers);
-//   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
-
-//   const [userRole, setUserRole] = useState<UserRole>(() => {
-//     const savedRole = localStorage.getItem('userRole');
-//     return (savedRole as UserRole) || 'user';
-//   });
-
-//   // بررسی دسترسی - فقط ادمین
-//   useEffect(() => {
-//     const userEmail = localStorage.getItem('userEmail');
-//     const savedRole = localStorage.getItem('userRole');
-
-//     if (!userEmail || savedRole !== 'admin') {
-//       navigate('/library');
-//     }
-//   }, [navigate]);
-
-//   const handleLogout = () => {
-//     localStorage.removeItem('userRole');
-//     localStorage.removeItem('userEmail');
-//     navigate('/');
-//   };
-
-//   const handleRoleChange = (role: UserRole) => {
-//     setUserRole(role);
-//     localStorage.setItem('userRole', role || 'user');
-//     if (role !== 'admin') {
-//       navigate('/library');
-//     }
-//   };
-
-//   const handleToggleUserStatus = (userId: string) => {
-//     setUsers(users.map(user =>
-//       user.id === userId
-//         ? { ...user, status: user.status === 'active' ? 'blocked' : 'active' }
-//         : user
-//     ));
-//   };
-
-//   const handleAddUser = (newUser: Omit<User, 'id' | 'activeReservations'>) => {
-//     const user: User = {
-//       ...newUser,
-//       id: Date.now().toString(),
-//       activeReservations: 0
-//     };
-//     setUsers([...users, user]);
-//     setIsAddUserModalOpen(false);
-//   };
-
-//   const handleViewUser = (userId: string) => {
-//     navigate(`/users/${userId}`);
-//   };
-
-//   // فیلتر کردن کاربران
-//   const filteredUsers = users.filter(user => {
-//     const matchesSearch =
-//       user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//       user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//       user.phone.includes(searchQuery);
-
-//     const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-
-//     return matchesSearch && matchesStatus;
-//   });
-
-//   const stats = {
-//     total: users.length,
-//     active: users.filter(u => u.status === 'active').length,
-//     blocked: users.filter(u => u.status === 'blocked').length,
-//     totalReservations: users.reduce((sum, u) => sum + u.activeReservations, 0)
-//   };
 </script>
 
 <template>
@@ -145,6 +70,7 @@ function setStatusFilter(status: "ALL" | "ACTIVE" | "BLOCK") {
     <Header
       dir="ltr"
       :show-switch-role="user.userRole === 'ADMIN'"
+      :user-name="user.userName"
       :user-role="User_GetRole()"
       :mobile="user.getMobile"
       :no-search="true"

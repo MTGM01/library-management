@@ -8,11 +8,13 @@ import { useRouter } from "vue-router";
 import { User_SetRole } from "../repository/keyval/userRole";
 
 const {
+  userName,
   mobile,
   noSearch = false,
   userRole,
   showSwitchRole,
 } = defineProps<{
+  userName: string;
   mobile: string;
   userRole: UserRole;
   showSwitchRole: boolean;
@@ -61,7 +63,7 @@ function logout() {
             </div>
             <div class="flex flex-col gap-1 text-left">
               <span class="text-sm font-medium text-gray-900">
-                {{ userRole === "ADMIN" ? "مدیر سیستم" : "کاربر عادی" }}
+                {{ userName }}
               </span>
               <span class="text-xs text-gray-500">{{ mobile }}</span>
             </div>

@@ -44,6 +44,7 @@ watchEffect(async () => {
   <main class="flex flex-col w-full">
     <Header
       :show-switch-role="user.userRole === 'ADMIN'"
+      :user-name="user.userName"
       :user-role="userRole"
       :mobile="user.getMobile"
       v-model="searchedBook"
