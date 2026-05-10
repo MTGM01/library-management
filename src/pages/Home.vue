@@ -80,6 +80,15 @@ watchEffect(async () => {
               <span>افزودن کتاب جدید</span>
             </button>
           </div>
+          <RouterLink v-else to="/my-reservations" class="decoration-none">
+            <button
+              type="button"
+              class="w-fit flex items-center gap-2 px-6 py-3 border-none bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+            >
+              <UserManagement class="w-5 h-5" />
+              <span>رزرو های من</span>
+            </button>
+          </RouterLink>
         </div>
         <BookGrid :books="filteredBooks" :user />
       </div>
