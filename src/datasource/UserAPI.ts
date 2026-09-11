@@ -1,4 +1,4 @@
-import type { UserProps } from "../repository/user";
+import type { UserProps } from "../repository/authStore";
 import { httpGet } from "./setup";
 
 export interface API_Users_List_Output {

@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { computed, inject, ref, type Ref } from "vue";
+import { computed, ref } from "vue";
 import Close from "./icons/Close.vue";
-import { Book, booksCategories, type Category } from "../repository/book";
 import CircleLoading from "./CircleLoading.vue";
 import { showToast } from "../helper/showToast";
-import type { API_Book_List_Output } from "../datasource/BookListAPI";
+import {
+  booksCategories,
+  type Category,
+  useBooksStore,
+} from "../repository/booksStore";
 
 const { isOpen } = defineProps<{
   isOpen: boolean;
@@ -12,10 +15,9 @@ const { isOpen } = defineProps<{
 
 const emit = defineEmits<{
   (event: "close"): void;
-  (event: "add", data: API_Book_List_Output): void;
 }>();
 
-const selectedCategory = inject<Ref<Category>>("selectedCategory");
+const booksStore = useBooksStore();
 const isLoading = ref(false);
 const title = ref("");
 const author = ref("");
@@ -28,7 +30,7 @@ const categories = computed(() => booksCategories);
 async function handleAddBook() {
   try {
     isLoading.value = true;
-    const result = await Book.add({
+    const result = await booksStore.addBook({
       title: title.value,
       author: author.value,
       ISBN: isbn.value,
@@ -36,9 +38,7 @@ async function handleAddBook() {
       total: total.value,
       description: description.value,
     });
-    const booksList = await Book.getList(selectedCategory!.value);
     emit("close");
-    emit("add", booksList);
     showToast(
       "success",
       result.message === "The Book Added to Library Successfully"

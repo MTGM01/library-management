@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from "vue";
+import { onMounted } from "vue";
+import { storeToRefs } from "pinia";
 import Header from "../components/Header.vue";
-import { User_GetProfile } from "../repository/keyval/userProfile";
-import { User } from "../repository/user";
 import Footer from "../components/Footer.vue";
 import { useRouter } from "vue-router";
 import UserPlus from "../components/icons/UserPlus.vue";
@@ -13,7 +12,8 @@ import Search from "../components/icons/Search.vue";
 import Eye from "../components/icons/Eye.vue";
 import UserManagement from "../components/icons/UserManagement.vue";
 import { convertISOToJalali } from "../utils/convertDate";
-import { User_GetRole } from "../repository/keyval/userRole";
+import { useAuthStore } from "../repository/authStore";
+import { useUsersStore } from "../repository/usersStore";
 
 // import { useState, useEffect } from 'react';
 // import { useNavigate } from 'react-router';
@@ -24,55 +24,31 @@ import { User_GetRole } from "../repository/keyval/userRole";
 // import { UserRole } from '../App';
 
 const router = useRouter();
-const user = ref<User>(new User(User_GetProfile()));
-const usersList = ref<User[]>([]);
-const searchedUser = ref("");
-const statusFilter = ref<"ALL" | "ACTIVE" | "BLOCK">("ALL");
-const filteredUsers = computed(() => {
-  if (!usersList.value) return null;
-  if (!searchedUser.value.trim() && statusFilter.value === "ALL")
-    return usersList.value;
-  return usersList.value.filter(
-    (u) =>
-      (u.firstName
-        .toLowerCase()
-        .includes(searchedUser.value.trim().toLowerCase()) &&
-        u.status.replace(/[\u200B-\u200D\uFEFF]/g, "").trim() ===
-          statusFilter.value) ||
-      (u.lastName
-        .toLowerCase()
-        .includes(searchedUser.value.trim().toLowerCase()) &&
-        u.status.replace(/[\u200B-\u200D\uFEFF]/g, "").trim() ===
-          statusFilter.value),
-  );
-});
-const activeUsersCount = computed(
-  () => usersList.value.filter((u) => u.status === "ACTIVE").length,
-);
-const reservationsCount = computed(() =>
-  usersList.value.reduce((sum, u) => sum + u.reservedBooks.length, 0),
-);
+const authStore = useAuthStore();
+const usersStore = useUsersStore();
+const { profile, role, mobile } = storeToRefs(authStore);
+const {
+  users,
+  searchQuery,
+  statusFilter,
+  filteredUsers,
+  activeUsersCount,
+  reservationsCount,
+} = storeToRefs(usersStore);
 
-watchEffect(async () => {
-  const plainUsers = (await User.getUsers()).result.filter(
-    (u) => u.role === "USER",
-  );
-  usersList.value = plainUsers.map((pu) => User.fromJSON(pu));
+onMounted(() => {
+  usersStore.fetchUsers();
 });
-
-function setStatusFilter(status: "ALL" | "ACTIVE" | "BLOCK") {
-  statusFilter.value = status;
-}
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50" dir="rtl">
     <Header
       dir="ltr"
-      :show-switch-role="user.userRole === 'ADMIN'"
-      :user-name="user.userName"
-      :user-role="User_GetRole()"
-      :mobile="user.getMobile"
+      :show-switch-role="profile?.role === 'ADMIN'"
+      :user-name="profile?.userName ?? ''"
+      :user-role="role ?? 'USER'"
+      :mobile="mobile"
       :no-search="true"
       @change-role="router.back()"
     />
@@ -121,7 +97,7 @@ function setStatusFilter(status: "ALL" | "ACTIVE" | "BLOCK") {
                 <div class="flex flex-col">
                   <span class="text-gray-600 text-sm mb-1">کل کاربران</span>
                   <span class="text-3xl font-bold text-gray-900">
-                    {{ usersList.length }}
+                    {{ users.length }}
                   </span>
                 </div>
                 <UserManagement class="w-10 h-10 text-blue-600" />
@@ -149,7 +125,7 @@ function setStatusFilter(status: "ALL" | "ACTIVE" | "BLOCK") {
                 <div class="flex flex-col">
                   <span class="text-gray-600 text-sm mb-1">کاربران مسدود</span>
                   <span class="text-3xl font-bold text-red-600">
-                    {{ usersList.length - activeUsersCount }}
+                    {{ users.length - activeUsersCount }}
                   </span>
                 </div>
                 <UserCross class="w-10 h-10 text-red-600" />
@@ -180,7 +156,7 @@ function setStatusFilter(status: "ALL" | "ACTIVE" | "BLOCK") {
               <input
                 type="search"
                 placeholder="جستجو بر اساس نام ..."
-                v-model="searchedUser"
+                v-model="searchQuery"
                 class="w-93% px-4 py-3 pr-12 rounded-lg border border-solid border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <Search
@@ -197,7 +173,7 @@ function setStatusFilter(status: "ALL" | "ACTIVE" | "BLOCK") {
                     ? 'bg-white text-blue-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 "
-                @click="setStatusFilter('ALL')"
+                @click="usersStore.setStatusFilter('ALL')"
               >
                 همه
               </button>
@@ -209,7 +185,7 @@ function setStatusFilter(status: "ALL" | "ACTIVE" | "BLOCK") {
                     ? 'bg-white text-green-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 "
-                @click="setStatusFilter('ACTIVE')"
+                @click="usersStore.setStatusFilter('ACTIVE')"
               >
                 فعال
               </button>
@@ -221,7 +197,7 @@ function setStatusFilter(status: "ALL" | "ACTIVE" | "BLOCK") {
                     ? 'bg-white text-red-600 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 "
-                @click="setStatusFilter('BLOCK')"
+                @click="usersStore.setStatusFilter('BLOCK')"
               >
                 مسدود شده
               </button>

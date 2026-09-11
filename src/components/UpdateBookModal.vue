@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import { computed, inject, ref, type Ref } from "vue";
+import { computed, ref } from "vue";
 import Close from "./icons/Close.vue";
-import { Book, booksCategories, type Category } from "../repository/book";
 import CircleLoading from "./CircleLoading.vue";
 import { showToast } from "../helper/showToast";
-import type { API_Book_List_Output } from "../datasource/BookListAPI";
+import {
+  booksCategories,
+  type BookProps,
+  type Category,
+  useBooksStore,
+} from "../repository/booksStore";
 
 const { isOpen, book } = defineProps<{
   isOpen: boolean;
-  book: Book;
+  book: BookProps;
 }>();
 
 const emit = defineEmits<{
   (event: "close"): void;
-  (event: "update", data: API_Book_List_Output): void;
 }>();
 
+const booksStore = useBooksStore();
 const isLoading = ref(false);
 const title = ref(book.title);
 const author = ref(book.author);
@@ -24,14 +28,13 @@ const isbn = ref(book.ISBN);
 const total = ref(book.total);
 const availableCount = ref(book.availableCount);
 const description = ref(book.description);
-const selectedCategory = inject<Ref<Category>>("selectedCategory");
 const categories = computed(() => booksCategories);
 
 async function handleUpdateBook() {
   try {
     isLoading.value = true;
-    const result = await book.update({
-      id: book.id,
+    const result = await booksStore.updateBook({
+      id: book._id,
       title: title.value,
       author: author.value,
       ISBN: isbn.value,
@@ -40,9 +43,7 @@ async function handleUpdateBook() {
       category: category.value,
       description: description.value,
     });
-    const booksList = await Book.getList(selectedCategory!.value);
     emit("close");
-    emit("update", booksList);
     showToast(
       "success",
       result.message === "The Book Updated Successfully"

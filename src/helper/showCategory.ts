@@ -1,4 +1,4 @@
-import type { Category } from "../repository/book";
+import type { Category } from "../repository/booksStore";
 
 export function convertToCategoryName(categoryValue: Category) {
   switch (categoryValue) {

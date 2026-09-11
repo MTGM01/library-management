@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { User } from "../repository/user";
 import CircleLoading from "../components/CircleLoading.vue";
 import EyeOff from "../components/icons/EyeOff.vue";
 import Eye from "../components/icons/Eye.vue";
 import BookOpen from "../components/icons/BookOpen.vue";
+import { useAuthStore } from "../repository/authStore";
 
 const router = useRouter();
+const authStore = useAuthStore();
 const userName = ref("");
 const password = ref("");
 const isLoading = ref(false);
@@ -20,7 +21,7 @@ const passwordInputType = computed(() =>
 async function handleLogin() {
   try {
     isLoading.value = true;
-    await User.login({
+    await authStore.login({
       userName: userName.value,
       password: password.value,
     });

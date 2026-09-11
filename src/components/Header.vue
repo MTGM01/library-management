@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { UserRole } from "../repository/user";
+import type { UserRole } from "../repository/authStore";
 import BookOpen from "./icons/BookOpen.vue";
 import LogOut from "./icons/LogOut.vue";
 import Search from "./icons/Search.vue";
 import UnknownUser from "./icons/UnknownUser.vue";
 import { useRouter } from "vue-router";
-import { User_SetRole } from "../repository/keyval/userRole";
+import { useAuthStore } from "../repository/authStore";
 
 const {
   userName,
@@ -22,6 +22,7 @@ const {
 }>();
 
 const router = useRouter();
+const authStore = useAuthStore();
 
 const searchedBook = defineModel();
 
@@ -30,12 +31,12 @@ const emit = defineEmits<{
 }>();
 
 function changeUserRole(role: UserRole) {
-  User_SetRole(role);
+  authStore.setRole(role);
   emit("changeRole", role);
 }
 
 function logout() {
-  localStorage.clear();
+  authStore.logout();
   router.push("/login");
 }
 </script>

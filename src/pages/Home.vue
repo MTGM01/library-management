@@ -1,54 +1,36 @@
 <script setup lang="ts">
-import { computed, provide, ref, watchEffect } from "vue";
+import { computed, onMounted, ref } from "vue";
+import { storeToRefs } from "pinia";
 import BookGrid from "../components/BookGrid.vue";
 import Footer from "../components/Footer.vue";
 import Header from "../components/Header.vue";
-import { Book, type Category, type BookProps } from "../repository/book";
 import Sidebar from "../components/Sidebar.vue";
-import { User, type UserRole } from "../repository/user";
-import { User_GetProfile } from "../repository/keyval/userProfile";
 import AddBookModal from "../components/AddBookModal.vue";
 import UserManagement from "../components/icons/UserManagement.vue";
 import { RouterLink } from "vue-router";
-import { User_GetRole } from "../repository/keyval/userRole";
+import { useAuthStore } from "../repository/authStore";
+import { type Category, useBooksStore } from "../repository/booksStore";
 
 const openAddNewBookModal = ref(false);
-const searchedBook = ref("");
-const books = ref<BookProps[] | null>(null);
-const category = ref<Category>("all");
-const user = ref<User>(new User(User_GetProfile()));
-const userRole = ref<UserRole>(User_GetRole());
-const filteredBooks = computed(() => {
-  if (!books.value) return null;
-  if (!searchedBook.value.trim()) return books.value;
-  return books.value.filter((book) =>
-    book.title.toLowerCase().includes(searchedBook.value.trim().toLowerCase()),
-  );
-});
+const authStore = useAuthStore();
+const booksStore = useBooksStore();
+const { profile, role, isAdmin, mobile } = storeToRefs(authStore);
+const { books, searchQuery, filteredBooks } = storeToRefs(booksStore);
+const canSwitchRole = computed(() => profile.value?.role === "ADMIN");
 
-function updateList(booksList: BookProps[] | null) {
-  books.value = booksList;
-}
-
-provide("user", user);
-provide("userRole", userRole);
-provide("updateList", updateList);
-provide("selectedCategory", category);
-
-watchEffect(async () => {
-  books.value = (await Book.getList(category.value)).result;
+onMounted(() => {
+  booksStore.fetchBooks();
 });
 </script>
 
 <template>
   <main class="flex flex-col w-full">
     <Header
-      :show-switch-role="user.userRole === 'ADMIN'"
-      :user-name="user.userName"
-      :user-role="userRole"
-      :mobile="user.getMobile"
-      v-model="searchedBook"
-      @change-role="(role) => (userRole = role)"
+      :show-switch-role="canSwitchRole"
+      :user-name="profile?.userName ?? ''"
+      :user-role="role ?? 'USER'"
+      :mobile="mobile"
+      v-model="searchQuery"
     />
     <div class="flex grow justify-end">
       <div class="flex flex-col m-6 w-full">
@@ -61,7 +43,7 @@ watchEffect(async () => {
               {{ filteredBooks?.length }} کتاب یافت شد
             </p>
           </div>
-          <div class="flex items-center gap-3" v-if="userRole === 'ADMIN'">
+          <div class="flex items-center gap-3" v-if="isAdmin">
             <RouterLink to="/users" class="decoration-none">
               <button
                 type="button"
@@ -90,11 +72,11 @@ watchEffect(async () => {
             </button>
           </RouterLink>
         </div>
-        <BookGrid :books="filteredBooks" :user />
+        <BookGrid :books="filteredBooks" />
       </div>
       <Sidebar
         :books
-        @select="(categoryValue: Category) => (category = categoryValue)"
+        @select="(categoryValue: Category) => booksStore.fetchBooks(categoryValue)"
       />
     </div>
     <Footer />
@@ -102,8 +84,6 @@ watchEffect(async () => {
   <AddBookModal
     dir="rtl"
     :is-open="openAddNewBookModal"
-    :selected-category="category"
-    @add="(data) => (books = data.result)"
     @close="openAddNewBookModal = false"
   />
 </template>

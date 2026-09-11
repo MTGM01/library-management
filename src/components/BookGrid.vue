@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import BookCard from "./BookCard.vue";
-import type { BookProps } from "../repository/book";
+import type { BookProps } from "../repository/booksStore";
 import BookNotFound from "./icons/BookNotFound.vue";
 
 const { books } = defineProps<{

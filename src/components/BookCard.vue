@@ -1,42 +1,34 @@
 <script setup lang="ts">
 import ImageWithFallback from "./ImageWithFallback.vue";
-import { Book, type BookProps, type Category } from "../repository/book";
+import type { BookProps } from "../repository/booksStore";
 import EditBook from "./icons/EditBook.vue";
 import RemoveBook from "./icons/RemoveBook.vue";
 import { convertToCategoryName } from "../helper/showCategory";
-import { computed, inject, ref, type Ref } from "vue";
-import type { UserProps, UserRole } from "../repository/user";
+import { computed, ref } from "vue";
 import UpdateBookModal from "./UpdateBookModal.vue";
 import Calendar from "./icons/Calendar.vue";
 import RemoveConfirm from "./RemoveConfirm.vue";
 import { showToast } from "../helper/showToast";
 import CircleLoading from "./CircleLoading.vue";
-import {
-  User_GetProfile,
-  User_SetProfile,
-} from "../repository/keyval/userProfile";
+import { useAuthStore } from "../repository/authStore";
+import { useBooksStore } from "../repository/booksStore";
 
 const { book } = defineProps<{
   book: BookProps;
 }>();
 
-const userRole = inject<UserRole>("userRole");
-const userProfile = ref<UserProps>(User_GetProfile());
+const authStore = useAuthStore();
+const booksStore = useBooksStore();
 const openUpdateBookModal = ref(false);
 const openRemoveBookModal = ref(false);
 const isRemoveLoading = ref(false);
 const isReserveLoading = ref(false);
-const bookInstance = ref<Book>(new Book(book));
 const isAvailable = computed(() => book.availableCount > 0);
 const canNotReserve = computed(() =>
-  userProfile.value.reservedBooks.some(
+  authStore.profile?.reservedBooks.some(
     (reservedBook) => reservedBook === book._id,
   ),
 );
-
-const updateBooks =
-  inject<(booksList: BookProps[] | null) => void>("updateList");
-const selectedCategory = inject<Ref<Category>>("selectedCategory");
 const bookImageMap: Record<string, string> = {
   "computer-programming-book":
     "https://images.unsplash.com/photo-1732304722020-be33345c00c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21wdXRlciUyMHByb2dyYW1taW5nJTIwYm9va3xlbnwxfHx8fDE3NzAyODI5NDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
@@ -55,11 +47,9 @@ const bookImageMap: Record<string, string> = {
 async function handleRemoveBook() {
   try {
     isRemoveLoading.value = true;
-    const result = await bookInstance.value.remove({
-      id: bookInstance.value.id,
+    const result = await booksStore.removeBook({
+      id: book._id,
     });
-    const booksList = await Book.getList(selectedCategory!.value);
-    updateBooks?.(booksList.result);
     showToast(
       "success",
       result.message === "The Book Removed Successfully"
@@ -77,16 +67,13 @@ async function handleRemoveBook() {
 async function handleReserveBook() {
   try {
     isReserveLoading.value = true;
-    const result = await bookInstance.value.reserve({
-      userID: User_GetProfile()._id,
-      bookID: bookInstance.value.id,
+    if (!authStore.profile) throw new Error("User profile not found");
+
+    const result = await booksStore.reserveBook({
+      userID: authStore.profile._id,
+      bookID: book._id,
     });
-    const booksList = await Book.getList(selectedCategory!.value);
-    userProfile.value.reservedBooks.push(bookInstance.value.id);
-    User_SetProfile({
-      ...userProfile.value,
-    });
-    updateBooks?.(booksList.result);
+    authStore.addReservedBook(book._id);
     showToast(
       "success",
       result.message === "The Book Reserved Successfully"
@@ -111,7 +98,7 @@ async function handleReserveBook() {
       class="relative flex items-center justify-center h-64 bg-gray-100 overflow-hidden"
     >
       <div
-        v-if="userRole === 'ADMIN'"
+        v-if="authStore.role === 'ADMIN'"
         class="h-8 absolute top-3 left-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity"
       >
         <button
@@ -193,7 +180,7 @@ async function handleReserveBook() {
       </div>
 
       <button
-        v-if="userRole === 'USER'"
+        v-if="authStore.role === 'USER'"
         class="flex items-center justify-center gap-2 w-full py-3 relative rounded-lg transition-colors font-medium border-none"
         :class="
           !isAvailable || isReserveLoading || canNotReserve
@@ -219,7 +206,7 @@ async function handleReserveBook() {
         />
       </button>
 
-      <div v-if="userRole === 'ADMIN'" class="bg-gray-50 p-3 rounded-lg">
+      <div v-if="authStore.role === 'ADMIN'" class="bg-gray-50 p-3 rounded-lg">
         <div class="flex justify-between text-sm">
           <span class="text-gray-600">موجود:</span>
           <span class="font-bold text-green-600">
@@ -237,10 +224,9 @@ async function handleReserveBook() {
   </div>
   <UpdateBookModal
     dir="rtl"
-    :book="bookInstance"
+    :book="book"
     :isOpen="openUpdateBookModal"
     @close="openUpdateBookModal = false"
-    @update="(updatedBooksList) => updateBooks?.(updatedBooksList.result)"
   />
   <RemoveConfirm
     :isOpen="openRemoveBookModal"

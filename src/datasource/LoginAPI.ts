@@ -1,4 +1,4 @@
-import type { UserProps } from "../repository/user";
+import type { UserProps } from "../repository/authStore";
 import { httpPost } from "./setup";
 
 export interface API_User_Login_Input {

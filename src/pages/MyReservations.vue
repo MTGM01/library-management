@@ -1,114 +1,41 @@
 <script setup lang="ts">
+import { computed, onMounted } from "vue";
 import { RouterLink } from "vue-router";
+import { storeToRefs } from "pinia";
 import BookOpen from "../components/icons/BookOpen.vue";
+import Header from "../components/Header.vue";
+import Footer from "../components/Footer.vue";
+import { useAuthStore } from "../repository/authStore";
+import { useBooksStore } from "../repository/booksStore";
 
-/*
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { BookOpen, CheckCircle, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
-import { mockReservations, Reservation } from '../data/mockData';
-import { UserRole } from '../App';
-import { getActualReservationStatus, calculateOverdueDays, calculateLateFee, formatCurrency } from '../utils/dateHelpers';
+const authStore = useAuthStore();
+const booksStore = useBooksStore();
+const { profile, role, mobile } = storeToRefs(authStore);
+const { books } = storeToRefs(booksStore);
 
-export function MyReservations() {
-  const navigate = useNavigate();
-  
-  const [currentUser, setCurrentUser] = useState(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+const reservedBooks = computed(() => {
+  const reservedBookIds = profile.value?.reservedBooks ?? [];
+  return (
+    books.value?.filter((book) => reservedBookIds.includes(book._id)) ?? []
+  );
+});
 
-  const [userRole, setUserRole] = useState<UserRole>(() => {
-    const savedRole = localStorage.getItem('userRole');
-    return (savedRole as UserRole) || 'user';
-  });
-
-  // دریافت رزروهای کاربر فعلی
-  const [reservations, setReservations] = useState<Reservation[]>(() => {
-    const savedReservations = JSON.parse(localStorage.getItem('reservations') || '[]');
-    const allReservations = [...mockReservations, ...savedReservations];
-    return allReservations.filter(r => r.userId === currentUser?.id);
-  });
-
-  // محاسبه وضعیت واقعی
-  const actualReservations = reservations.map(r => ({
-    ...r,
-    actualStatus: getActualReservationStatus(r.status, r.dueDate)
-  }));
-
-  // بررسی authentication
-  useEffect(() => {
-    const userEmail = localStorage.getItem('userEmail');
-    if (!userEmail || !currentUser) {
-      navigate('/');
-    }
-  }, [navigate, currentUser]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('userRole');
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('currentUser');
-    navigate('/');
-  };
-
-  const handleRoleChange = (role: UserRole) => {
-    setUserRole(role);
-    localStorage.setItem('userRole', role || 'user');
-    
-    if (currentUser) {
-      const updatedUser = { ...currentUser, role: role || 'user' };
-      setCurrentUser(updatedUser);
-      localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-    }
-  };
-
-  const getStatusIcon = (status: Reservation['status']) => {
-    switch (status) {
-      case 'borrowed':
-        return <BookOpen class="w-5 h-5 text-blue-600" />;
-      case 'returned':
-        return <CheckCircle class="w-5 h-5 text-green-600" />;
-      case 'overdue':
-        return <AlertTriangle class="w-5 h-5 text-red-600" />;
-    }
-  };
-
-  const getStatusText = (status: Reservation['status']) => {
-    switch (status) {
-      case 'borrowed':
-        return 'امانت گرفته شده';
-      case 'returned':
-        return 'بازگشت داده شده';
-      case 'overdue':
-        return 'دیرکرد';
-    }
-  };
-
-  const getStatusColor = (status: Reservation['status']) => {
-    switch (status) {
-      case 'borrowed':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'returned':
-        return 'bg-green-100 text-green-700 border-green-200';
-      case 'overdue':
-        return 'bg-red-100 text-red-700 border-red-200';
-    }
-  };
-
-  const activeReservations = actualReservations.filter(r => r.actualStatus === 'borrowed');
-  const returnedReservations = actualReservations.filter(r => r.actualStatus === 'returned');
-  const overdueReservations = actualReservations.filter(r => r.actualStatus === 'overdue');
-  
-  // محاسبه کل جریمه
-  const totalLateFee = overdueReservations.reduce((sum, r) => {
-    return sum + calculateLateFee(calculateOverdueDays(r.dueDate));
-  }, 0);
-  */
-const totalLateFee = 5;
+onMounted(() => {
+  booksStore.fetchBooks("all");
+});
 </script>
 
 <template>
   <div class="min-h-screen flex flex-col bg-gray-50" dir="rtl">
+    <Header
+      dir="ltr"
+      :show-switch-role="profile?.role === 'ADMIN'"
+      :user-name="profile?.userName ?? ''"
+      :user-role="role ?? 'USER'"
+      :mobile="mobile"
+      :no-search="true"
+    />
+
     <section class="flex-1 p-6">
       <div class="max-w-7xl mx-auto">
         <RouterLink to="/" class="decoration-none">
@@ -116,7 +43,6 @@ const totalLateFee = 5;
             type="button"
             class="flex items-center gap-2 bg-transparent border-none text-gray-600 hover:text-gray-900 mb-6 transition-colors cursor-pointer"
           >
-            <!-- <ArrowRight class="w-5 h-5" /> -->
             <span>بازگشت به کتابخانه</span>
           </button>
         </RouterLink>
@@ -129,96 +55,25 @@ const totalLateFee = 5;
             <div class="flex flex-col gap-2">
               <h1 class="text-3xl font-bold text-gray-900 my-0">رزروهای من</h1>
               <p class="text-gray-600 my-0">
-                مشاهده و مدیریت کتاب‌های رزرو شده
+                مشاهده کتاب‌هایی که با حساب فعلی رزرو شده‌اند
               </p>
             </div>
           </div>
 
-          <div class="grid grid-cols-4 gap-4">
-            <div class="bg-white p-6 rounded-xl border border-gray-200">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white p-6 rounded-xl border border-solid border-gray-200">
               <div class="flex items-center justify-between">
-                <div>
+                <div class="flex flex-col">
                   <span class="text-gray-600 text-sm mb-1">کل رزروها</span>
-                  <span class="text-3xl font-bold text-gray-900"
-                    >{actualReservations.length}</span
-                  >
-                </div>
-                <BookOpen class="w-10 h-10 text-gray-400" />
-              </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-xl border border-gray-200">
-              <div class="flex items-center justify-between">
-                <div>
-                  <span class="text-gray-600 text-sm mb-1">در دست من</span>
-                  <span class="text-3xl font-bold text-blue-600"
-                    >{activeReservations.length}</span
-                  >
-                </div>
-                <Clock class="w-10 h-10 text-blue-600" />
-              </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-xl border border-gray-200">
-              <div class="flex items-center justify-between">
-                <div>
-                  <span class="text-gray-600 text-sm mb-1"
-                    >بازگشت داده شده</span
-                  >
-                  <span class="text-3xl font-bold text-green-600"
-                    >{returnedReservations.length}</span
-                  >
-                </div>
-                <!-- <CheckCircle class="w-10 h-10 text-green-600" /> -->
-              </div>
-            </div>
-
-            <div class="p-6 rounded-xl border-2 border-solid">
-              <!-- :class="totalLateFee > 0 ? 'bg-red-50 border-red-300' : 'bg-white border-gray-200" -->
-              <div class="flex items-center justify-between">
-                <div>
-                  <span class="text-gray-600 text-sm mb-1">جریمه دیرکرد</span>
-                  <span
-                    class="text-2xl font-bold"
-                    :class="totalLateFee > 0 ? 'text-red-600' : 'text-gray-900'"
-                  >
-                    {formatCurrency(totalLateFee)}
+                  <span class="text-3xl font-bold text-gray-900">
+                    {{ reservedBooks.length }}
                   </span>
                 </div>
-                <!-- <AlertTriangle class={`w-10 h-10 ${totalLateFee > 0 ? 'text-red-600' : 'text-gray-400'}`} /> -->
+                <BookOpen class="w-10 h-10 text-blue-600" />
               </div>
             </div>
           </div>
         </div>
-
-        <!-- {overdueReservations.length > 0 && ( -->
-        <div class="bg-red-50 border-2 border-red-300 rounded-xl p-6 mb-6">
-          <div class="flex items-start gap-4">
-            <AlertTriangle class="w-8 h-8 text-red-600 flex-shrink-0 mt-1" />
-            <div class="flex-1">
-              <h3 class="text-xl font-bold text-red-900 mb-3">
-                ⚠️ هشدار: شما {overdueReservations.length} کتاب دیرکرد دارید!
-              </h3>
-              <p class="text-red-700 mb-4 text-lg">
-                جمع جریمه دیرکرد:
-                <strong class="text-2xl">{formatCurrency(totalLateFee)}</strong>
-              </p>
-              <div class="bg-white border border-red-300 rounded-lg p-4">
-                <p class="text-sm text-red-800 mb-2">
-                  <strong>لطفاً هرچه سریعتر اقدام کنید:</strong>
-                </p>
-                <ul
-                  class="text-sm text-red-700 space-y-1 list-disc list-inside"
-                >
-                  <li>کتاب‌های دیرکرد را به کتابخانه بازگردانید</li>
-                  <li>جریمه دیرکرد را هنگام بازگشت کتاب پرداخت کنید</li>
-                  <li>نرخ جریمه: 5,000 تومان به ازای هر روز تاخیر</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- )} -->
 
         <div
           class="bg-white rounded-xl border border-solid border-gray-200 overflow-hidden"
@@ -226,173 +81,64 @@ const totalLateFee = 5;
           <div
             class="px-6 py-4 border-b border-b-solid border-gray-200 bg-gray-50"
           >
-            <h2 class="text-xl font-bold text-gray-900">تاریخچه رزروها</h2>
+            <h2 class="text-xl font-bold text-gray-900 my-0">تاریخچه رزروها</h2>
           </div>
 
-          <div class="divide-y border-y-solid divide-gray-200">
-            {reservations.length === 0 ? (
-            <div class="text-center py-16">
-              <BookOpen class="w-20 h-20 text-gray-300 mx-auto mb-4" />
-              <h3 class="text-xl font-bold text-gray-700 mb-2">
-                هنوز کتابی رزرو نکرده‌اید
-              </h3>
-              <p class="text-gray-500 mb-6">
-                برای رزرو کتاب، به کتابخانه بروید و کتاب مورد نظر را انتخاب کنید
-              </p>
-              <RouterLink to="/">
-                <button
-                  type="button"
-                  class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors border-none cursor-pointer"
-                >
-                  مشاهده کتابخانه
-                </button>
-              </RouterLink>
-            </div>
-            <!-- ) : ( -->
-            actualReservations.map((reservation) => { const overdueDays =
-            reservation.actualStatus === 'overdue' ?
-            calculateOverdueDays(reservation.dueDate) : 0; const lateFee =
-            overdueDays > 0 ? calculateLateFee(overdueDays) : 0; return (
-            <div
-              key="{reservation.id}"
+          <div v-if="reservedBooks.length === 0" class="text-center py-16">
+            <BookOpen class="w-20 h-20 text-gray-300 mx-auto mb-4" />
+            <h3 class="text-xl font-bold text-gray-700 mb-2">
+              هنوز کتابی رزرو نکرده‌اید
+            </h3>
+            <p class="text-gray-500 mb-6">
+              برای رزرو کتاب، به کتابخانه برگردید و کتاب مورد نظر را انتخاب کنید
+            </p>
+            <RouterLink to="/">
+              <button
+                type="button"
+                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors border-none cursor-pointer"
+              >
+                مشاهده کتابخانه
+              </button>
+            </RouterLink>
+          </div>
+
+          <div v-else class="divide-y divide-gray-200">
+            <article
+              v-for="book in reservedBooks"
+              :key="book._id"
               class="p-6 hover:bg-gray-50 transition-colors"
             >
               <div class="flex items-center gap-4">
-                {/* تصویر کتاب */}
                 <div
                   class="w-20 h-28 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center shadow-md"
                 >
                   <BookOpen class="w-10 h-10 text-blue-600" />
                 </div>
 
-                {/* اطلاعات کتاب */}
                 <div class="flex-1">
                   <h3 class="text-xl font-bold text-gray-900 mb-2">
-                    {reservation.bookTitle}
+                    {{ book.title }}
                   </h3>
                   <p class="text-sm text-gray-600 mb-3">
-                    نویسنده: {reservation.bookAuthor}
+                    نویسنده: {{ book.author }}
                   </p>
-
-                  <div class="flex items-center gap-6 text-sm">
-                    <div class="flex items-center gap-2 text-gray-600">
-                      <Clock class="w-4 h-4" />
-                      <span
-                        >تاریخ امانت:
-                        <strong>{reservation.reservationDate}</strong></span
-                      >
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <!-- ${reservation.actualStatus === 'overdue' ? 'text-red-600 font-bold' : 'text-gray-600'}`} -->
-                      <!-- <AlertTriangle class="w-4 h-4" /> -->
-                      <span
-                        >مهلت بازگشت:
-                        <strong>{reservation.dueDate}</strong></span
-                      >
-                    </div>
-                    {reservation.returnDate && (
-                    <div class="flex items-center gap-2 text-gray-600">
-                      <CheckCircle class="w-4 h-4" />
-                      <span
-                        >تاریخ بازگشت:
-                        <strong>{reservation.returnDate}</strong></span
-                      >
-                    </div>
-                    )}
-                  </div>
-
-                  {/* نمایش جریمه دیرکرد */} {reservation.actualStatus ===
-                  'overdue' && (
-                  <div
-                    class="mt-4 bg-red-100 border-2 border-red-300 rounded-lg p-4"
-                  >
-                    <div class="flex items-center gap-3">
-                      <AlertTriangle
-                        class="w-6 h-6 text-red-600 flex-shrink-0"
-                      />
-                      <div class="flex-1">
-                        <p class="text-red-900 font-bold mb-1">
-                          این کتاب {overdueDays} روز دیرکرد دارد!
-                        </p>
-                        <p class="text-red-700">
-                          جریمه قابل پرداخت:
-                          <strong class="text-xl"
-                            >{formatCurrency(lateFee)}</strong
-                          >
-                        </p>
-                        <p class="text-sm text-red-600 mt-2">
-                          💡 این جریمه هنگام بازگشت کتاب به کتابخانه دریافت
-                          خواهد شد.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  )}
+                  <p class="text-sm text-gray-500 my-0">
+                    ISBN: {{ book.ISBN }}
+                  </p>
                 </div>
 
-                {/* وضعیت */}
-                <div class="flex flex-col items-end gap-3">
-                  <span
-                    class="{`flex"
-                    items-center
-                    gap-2
-                    px-4
-                    py-3
-                    rounded-lg
-                    font-medium
-                    border-2
-                    ${getStatusColor(reservation.actualStatus)}`}
-                  >
-                    {getStatusIcon(reservation.actualStatus)}
-                    <span class="text-sm"
-                      >{getStatusText(reservation.actualStatus)}</span
-                    >
-                  </span>
-                </div>
+                <span
+                  class="px-4 py-2 rounded-lg font-medium bg-blue-100 text-blue-700 border border-solid border-blue-200"
+                >
+                  رزرو شده
+                </span>
               </div>
-            </div>
-            ); }) )}
+            </article>
           </div>
         </div>
-
-        {/* راهنما */} {actualReservations.length > 0 && (
-        <div class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-6">
-          <h3 class="font-bold text-blue-900 mb-3">📚 راهنمای استفاده</h3>
-          <ul class="space-y-2 text-sm text-blue-800">
-            <li class="flex items-start gap-2">
-              <span class="text-blue-600">•</span>
-              <span
-                ><strong>امانت گرفته شده:</strong> کتاب در دست شماست و در حال
-                مطالعه می‌باشید</span
-              >
-            </li>
-            <li class="flex items-start gap-2">
-              <span class="text-green-600">•</span>
-              <span
-                ><strong>بازگشت داده شده:</strong> کتاب را به کتابخانه
-                بازگردانده‌اید (تاریخچه)</span
-              >
-            </li>
-            <li class="flex items-start gap-2">
-              <span class="text-red-600">•</span>
-              <span
-                ><strong>دیرکرد:</strong> مهلت بازگشت کتاب گذشته است - باید هرچه
-                سریعتر کتاب را برگردانید و جریمه را پرداخت کنید</span
-              >
-            </li>
-            <li
-              class="flex items-start gap-2 mt-4 pt-3 border-t border-blue-200"
-            >
-              <span class="text-orange-600">💰</span>
-              <span
-                ><strong>نرخ جریمه:</strong> 5,000 تومان به ازای هر روز تاخیر در
-                بازگشت کتاب</span
-              >
-            </li>
-          </ul>
-        </div>
-        )}
       </div>
     </section>
+
+    <Footer dir="ltr" />
   </div>
 </template>

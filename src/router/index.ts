@@ -4,6 +4,8 @@ import Login from "../pages/Login.vue"; // صفحه لاگین رو import کن�
 import Users from "../pages/Users.vue";
 import UserDetail from "../pages/UserDetail.vue";
 import MyReservations from "../pages/MyReservations.vue";
+import { pinia } from "../repository/pinia";
+import { useAuthStore } from "../repository/authStore";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -41,12 +43,12 @@ const router = createRouter({
 });
 
 // تعریف router guard
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   // بررسی آیا مسیر نیاز به احراز هویت دارد
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
 
   // بررسی وضعیت لاگین
-  const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+  const { isAuthenticated } = useAuthStore(pinia);
 
   if (requiresAuth && !isAuthenticated) {
     // اگر نیاز به احراز هویت دارد و لاگین نیست، برو به صفحه لاگین

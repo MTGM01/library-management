@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
+import { storeToRefs } from "pinia";
 import Filter from "./icons/Filter.vue";
 import BookOpen from "./icons/BookOpen.vue";
 import {
-  booksCategories,
   type BookProps,
+  booksCategories,
   type Category,
-} from "../repository/book";
+  useBooksStore,
+} from "../repository/booksStore";
 
 const { books } = defineProps<{
   books: BookProps[] | null;
@@ -16,7 +18,8 @@ const emit = defineEmits<{
   (event: "select", value: Category): void;
 }>();
 
-const selectedCategory = ref("all");
+const booksStore = useBooksStore();
+const { selectedCategory } = storeToRefs(booksStore);
 const categories = computed(() => booksCategories);
 const booksTotal = computed(() => {
   if (!books) return 0;
