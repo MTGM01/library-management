@@ -60,9 +60,13 @@ async function handleRemoveBook() {
         ? "کتاب با موفقیت حذف شد"
         : result.message,
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
-    showToast("error", "خطایی رخ داده است !");
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      showToast("error", "اتصال به اینترنت برقرار نیست");
+    } else {
+      showToast("error", "خطا در حذف کتاب");
+    }
   } finally {
     isRemoveLoading.value = false;
   }
@@ -97,9 +101,13 @@ async function executeReservation() {
         ? "کتاب با موفقیت رزرو شد"
         : result.message,
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
-    showToast("error", "خطایی رخ داده است !");
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      showToast("error", "اتصال به اینترنت برقرار نیست");
+    } else {
+      showToast("error", "خطا در رزرو کتاب");
+    }
   } finally {
     isReserveLoading.value = false;
   }

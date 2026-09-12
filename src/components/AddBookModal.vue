@@ -50,9 +50,13 @@ async function handleAddBook() {
     isbn.value = "";
     category.value = "all";
     total.value = 0;
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
-    showToast("error", "خطایی رخ داده است !");
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      showToast("error", "اتصال به اینترنت برقرار نیست");
+    } else {
+      showToast("error", "خطا در افزودن کتاب");
+    }
   } finally {
     isLoading.value = false;
   }

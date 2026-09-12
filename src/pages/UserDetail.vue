@@ -8,6 +8,7 @@ import UnknownUser from "../components/icons/UnknownUser.vue";
 import Calendar from "../components/icons/Calendar.vue";
 import BookOpen from "../components/icons/BookOpen.vue";
 import phone from "../components/icons/phone.vue";
+import CircleLoading from "../components/CircleLoading.vue";
 import { convertISOToJalali } from "../utils/convertDate";
 import { useAuthStore } from "../repository/authStore";
 import { useUsersStore } from "../repository/usersStore";
@@ -17,10 +18,10 @@ const router = useRouter();
 const authStore = useAuthStore();
 const usersStore = useUsersStore();
 const { profile, role, mobile } = storeToRefs(authStore);
-const { users } = storeToRefs(usersStore);
+const { users, isLoading } = storeToRefs(usersStore);
 
 const selectedUser = computed(() =>
-  users.value.find((user) => user.id === route.params.userId),
+  users.value.find((user) => user._id === route.params.userId),
 );
 
 onMounted(() => {
@@ -51,7 +52,14 @@ onMounted(() => {
         </button>
 
         <section
-          v-if="selectedUser"
+          v-if="isLoading"
+          class="flex justify-center py-12"
+        >
+          <CircleLoading class="w-10 h-10 text-blue-600" />
+        </section>
+
+        <section
+          v-else-if="selectedUser"
           class="bg-white rounded-xl border border-solid border-gray-200 p-6"
         >
           <div class="flex items-start justify-between gap-6">

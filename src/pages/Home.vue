@@ -7,6 +7,7 @@ import Header from "../components/Header.vue";
 import Sidebar from "../components/Sidebar.vue";
 import AddBookModal from "../components/AddBookModal.vue";
 import UserManagement from "../components/icons/UserManagement.vue";
+import CircleLoading from "../components/CircleLoading.vue";
 import { RouterLink } from "vue-router";
 import { useAuthStore } from "../repository/authStore";
 import { type Category, useBooksStore } from "../repository/booksStore";
@@ -15,7 +16,7 @@ const openAddNewBookModal = ref(false);
 const authStore = useAuthStore();
 const booksStore = useBooksStore();
 const { profile, role, isAdmin, mobile } = storeToRefs(authStore);
-const { books, searchQuery, filteredBooks } = storeToRefs(booksStore);
+const { books, searchQuery, filteredBooks, isLoading } = storeToRefs(booksStore);
 const canSwitchRole = computed(() => profile.value?.role === "ADMIN");
 
 onMounted(() => {
@@ -72,10 +73,14 @@ onMounted(() => {
             </button>
           </RouterLink>
         </div>
-        <BookGrid :books="filteredBooks" />
+        <div v-if="isLoading" class="flex justify-center py-12">
+          <CircleLoading class="w-10 h-10 text-blue-600" />
+        </div>
+        <BookGrid v-else :books="filteredBooks" :is-loading="isLoading" />
       </div>
       <Sidebar
         :books
+        :is-loading="isLoading"
         @select="(categoryValue: Category) => booksStore.fetchBooks(categoryValue)"
       />
     </div>

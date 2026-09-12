@@ -11,17 +11,10 @@ import AlertCircle from "../components/icons/AlertCircle.vue";
 import Search from "../components/icons/Search.vue";
 import Eye from "../components/icons/Eye.vue";
 import UserManagement from "../components/icons/UserManagement.vue";
+import CircleLoading from "../components/CircleLoading.vue";
 import { convertISOToJalali } from "../utils/convertDate";
 import { useAuthStore } from "../repository/authStore";
 import { useUsersStore } from "../repository/usersStore";
-
-// import { useState, useEffect } from 'react';
-// import { useNavigate } from 'react-router';
-// import { Users, Search, UserCheck, UserX, Eye, AlertCircle, UserPlus } from 'lucide-react';
-// import { Footer } from './Footer';
-// import { AddUserModal } from './AddUserModal';
-// import { mockUsers, User } from '../data/mockData';
-// import { UserRole } from '../App';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -34,6 +27,7 @@ const {
   filteredUsers,
   activeUsersCount,
   reservationsCount,
+  isLoading,
 } = storeToRefs(usersStore);
 
 onMounted(() => {
@@ -82,14 +76,13 @@ onMounted(() => {
               <button
                 class="px-6 py-3 border-none bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 cursor-pointer"
               >
-                <!-- onClick={() => setIsAddUserModalOpen(true)} -->
                 <UserPlus class="w-5 h-5" />
                 <span>افزودن کاربر جدید</span>
               </button>
             </div>
           </div>
 
-          <div class="grid grid-cols-4 gap-4">
+          <div v-if="!isLoading" class="grid grid-cols-4 gap-4">
             <div
               class="bg-white p-6 rounded-xl border border-solid border-gray-200"
             >
@@ -145,6 +138,9 @@ onMounted(() => {
                 <AlertCircle class="w-10 h-10 text-orange-600" />
               </div>
             </div>
+          </div>
+          <div v-else class="flex justify-center py-12">
+            <CircleLoading class="w-10 h-10 text-blue-600" />
           </div>
         </div>
 
@@ -247,7 +243,7 @@ onMounted(() => {
               <tbody class="divide-y divide-gray-200">
                 <tr
                   v-for="filteredUser in filteredUsers"
-                  :key="filteredUser.id"
+                  :key="filteredUser._id"
                   class="hover:bg-gray-50 transition-colors"
                 >
                   <td class="px-6 py-4">
@@ -301,7 +297,6 @@ onMounted(() => {
                         class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border-none bg-transparent cursor-pointer"
                         title="مشاهده جزئیات"
                       >
-                        <!-- onClick={() => handleViewUser(user.id)} -->
                         <Eye class="w-5 h-5" />
                       </button>
                       <button
@@ -318,7 +313,6 @@ onMounted(() => {
                             : 'مسدود کردن'
                         "
                       >
-                        <!-- onClick={() => handleToggleUserStatus(user.id)} -->
                         <UserCheck
                           v-if="filteredUser.status === 'ACTIVE'"
                           class="w-5 h-5"
@@ -332,7 +326,7 @@ onMounted(() => {
             </table>
           </div>
 
-          <div v-if="!filteredUsers?.length" class="text-center py-12">
+          <div v-if="!isLoading && !filteredUsers?.length" class="text-center py-12">
             <UserManagement class="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p class="text-gray-500">کاربری یافت نشد</p>
           </div>
@@ -341,12 +335,5 @@ onMounted(() => {
     </section>
 
     <Footer dir="ltr" />
-
-    <!-- {isAddUserModalOpen && (
-        <AddUserModal
-          onClose={() => setIsAddUserModalOpen(false)}
-          onAdd={handleAddUser}
-        />
-      )} -->
   </div>
 </template>

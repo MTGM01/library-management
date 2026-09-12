@@ -1,12 +1,14 @@
 import { defineStore } from "pinia";
 import { API_Users_List } from "../datasource/UserAPI";
 import type { UserProps, UserStatus } from "./authStore";
+import { showToast } from "../helper/showToast";
 
 export const useUsersStore = defineStore("users", {
   state: () => ({
     users: [] as UserProps[],
     searchQuery: "",
     statusFilter: "ALL" as "ALL" | UserStatus,
+    isLoading: false,
   }),
 
   getters: {
@@ -32,10 +34,23 @@ export const useUsersStore = defineStore("users", {
 
   actions: {
     async fetchUsers() {
-      const plainUsers = (await API_Users_List()).result.filter(
-        (user) => user.role === "USER",
-      );
-      this.users = plainUsers;
+      this.isLoading = true;
+      try {
+        const plainUsers = (await API_Users_List()).result.filter(
+          (user) => user.role === "USER",
+        );
+        this.users = plainUsers;
+      } catch (error: any) {
+        console.error(error);
+        if (error instanceof TypeError && error.message.includes("fetch")) {
+          showToast("error", "اتصال به اینترنت برقرار نیست");
+        } else {
+          showToast("error", "خطا در دریافت لیست کاربران");
+        }
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
     },
 
     setStatusFilter(status: "ALL" | UserStatus) {

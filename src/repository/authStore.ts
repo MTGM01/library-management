@@ -104,12 +104,16 @@ export const useAuthStore = defineStore("auth", {
 
         return result;
       } catch (error: any) {
-        showToast(
-          "error",
-          "کاربر یافت نشد ! (نام کاربری و رمز عبور خود را با دقت وارد کنید)",
-        );
-        showToast("error", "اتصال به اینترنت خود را چک کنید");
         console.error(error);
+        if (error instanceof TypeError && error.message.includes("fetch")) {
+          showToast("error", "اتصال به اینترنت برقرار نیست");
+        } else if (error.message && error.message.includes("401")) {
+          showToast("error", "نام کاربری یا رمز عبور اشتباه است");
+        } else if (error.message && error.message.includes("404")) {
+          showToast("error", "کاربر یافت نشد");
+        } else {
+          showToast("error", "خطا در ورود به سیستم");
+        }
         throw error;
       }
     },

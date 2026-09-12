@@ -19,6 +19,7 @@ import {
   API_Update_Book,
   type API_Update_Book_Input,
 } from "../datasource/UpdateBookAPI";
+import { showToast } from "../helper/showToast";
 
 export type Category =
   | "all"
@@ -83,6 +84,7 @@ export const useBooksStore = defineStore("books", {
     books: null as BookProps[] | null,
     selectedCategory: "all" as Category,
     searchQuery: "",
+    isLoading: false,
   }),
 
   getters: {
@@ -100,38 +102,91 @@ export const useBooksStore = defineStore("books", {
     async fetchBooks(category?: Category): Promise<API_Book_List_Output> {
       const nextCategory = category ?? this.selectedCategory;
       this.selectedCategory = nextCategory;
-      const result = await API_Book_List({ category: nextCategory });
-      this.books = result.result;
-      return result;
+      this.isLoading = true;
+      try {
+        const result = await API_Book_List({ category: nextCategory });
+        this.books = result.result;
+        return result;
+      } catch (error: any) {
+        console.error(error);
+        if (error instanceof TypeError && error.message.includes("fetch")) {
+          showToast("error", "اتصال به اینترنت برقرار نیست");
+        } else {
+          showToast("error", "خطا در دریافت لیست کتاب‌ها");
+        }
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
     },
 
     async addBook(book: AddBookInput) {
-      const result = await API_Add_New_Book(book);
-      await this.fetchBooks();
-      return result;
+      try {
+        const result = await API_Add_New_Book(book);
+        await this.fetchBooks();
+        return result;
+      } catch (error: any) {
+        console.error(error);
+        if (error instanceof TypeError && error.message.includes("fetch")) {
+          showToast("error", "اتصال به اینترنت برقرار نیست");
+        } else {
+          showToast("error", "خطا در افزودن کتاب");
+        }
+        throw error;
+      }
     },
 
     async updateBook(book: UpdateBookInput) {
-      const currentBook = this.books?.find((item) => item._id === book.id);
-      const result = await API_Update_Book({
-        ...currentBook,
-        ...book,
-        id: book.id,
-      });
-      await this.fetchBooks();
-      return result;
+      try {
+        const currentBook = this.books?.find((item) => item._id === book.id);
+        const result = await API_Update_Book({
+          ...currentBook,
+          ...book,
+          id: book.id,
+        });
+        await this.fetchBooks();
+        return result;
+      } catch (error: any) {
+        console.error(error);
+        if (error instanceof TypeError && error.message.includes("fetch")) {
+          showToast("error", "اتصال به اینترنت برقرار نیست");
+        } else {
+          showToast("error", "خطا در ویرایش کتاب");
+        }
+        throw error;
+      }
     },
 
     async removeBook(input: RemoveBookInput) {
-      const result = await API_Remove_Book(input);
-      await this.fetchBooks();
-      return result;
+      try {
+        const result = await API_Remove_Book(input);
+        await this.fetchBooks();
+        return result;
+      } catch (error: any) {
+        console.error(error);
+        if (error instanceof TypeError && error.message.includes("fetch")) {
+          showToast("error", "اتصال به اینترنت برقرار نیست");
+        } else {
+          showToast("error", "خطا در حذف کتاب");
+        }
+        throw error;
+      }
     },
 
     async reserveBook(input: ReserveBookInput) {
-      const result = await API_Reserve_Book(input);
-      await this.fetchBooks();
-      return result;
+      try {
+        const result = await API_Reserve_Book(input);
+        await this.fetchBooks();
+        return result;
+      } catch (error: any) {
+        console.error(error);
+        if (error instanceof TypeError && error.message.includes("fetch")) {
+          showToast("error", "اتصال به اینترنت برقرار نیست");
+        } else {
+          showToast("error", "خطا در رزرو کتاب");
+        }
+        throw error;
+      }
     },
   },
 });

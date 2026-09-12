@@ -5,13 +5,14 @@ import { storeToRefs } from "pinia";
 import BookOpen from "../components/icons/BookOpen.vue";
 import Header from "../components/Header.vue";
 import Footer from "../components/Footer.vue";
+import CircleLoading from "../components/CircleLoading.vue";
 import { useAuthStore } from "../repository/authStore";
 import { useBooksStore } from "../repository/booksStore";
 
 const authStore = useAuthStore();
 const booksStore = useBooksStore();
 const { profile, role, mobile } = storeToRefs(authStore);
-const { books } = storeToRefs(booksStore);
+const { books, isLoading } = storeToRefs(booksStore);
 
 const reservedBooks = computed(() => {
   const reservedBookIds = profile.value?.reservedBooks ?? [];
@@ -84,7 +85,11 @@ onMounted(() => {
             <h2 class="text-xl font-bold text-gray-900 my-0">تاریخچه رزروها</h2>
           </div>
 
-          <div v-if="reservedBooks.length === 0" class="text-center py-16">
+          <div v-if="isLoading" class="flex justify-center py-16">
+            <CircleLoading class="w-10 h-10 text-blue-600" />
+          </div>
+
+          <div v-else-if="reservedBooks.length === 0" class="text-center py-16">
             <BookOpen class="w-20 h-20 text-gray-300 mx-auto mb-4" />
             <h3 class="text-xl font-bold text-gray-700 mb-2">
               هنوز کتابی رزرو نکرده‌اید

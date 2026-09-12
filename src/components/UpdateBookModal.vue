@@ -50,9 +50,13 @@ async function handleUpdateBook() {
         ? "کتاب با موفقیت ویرایش شد"
         : result.message,
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
-    showToast("error", "خطایی رخ داده است !");
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      showToast("error", "اتصال به اینترنت برقرار نیست");
+    } else {
+      showToast("error", "خطا در ویرایش کتاب");
+    }
   } finally {
     isLoading.value = false;
   }

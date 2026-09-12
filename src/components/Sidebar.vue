@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { storeToRefs } from "pinia";
 import Filter from "./icons/Filter.vue";
 import BookOpen from "./icons/BookOpen.vue";
+import CircleLoading from "./CircleLoading.vue";
 import {
   type BookProps,
   booksCategories,
@@ -10,8 +11,9 @@ import {
   useBooksStore,
 } from "../repository/booksStore";
 
-const { books } = defineProps<{
+const { books, isLoading } = defineProps<{
   books: BookProps[] | null;
+  isLoading: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -56,16 +58,17 @@ function selectCategory(categoryValue: Category) {
               ? 'bg-blue-50 text-blue-700 font-medium'
               : 'text-gray-700 hover:bg-gray-50'
           "
+          :disabled="isLoading"
         >
           <span>{{ category.title }}</span>
           <BookOpen class="w-4 h-4" />
         </button>
       </nav>
 
-      <div
-        dir="rtl"
-        class="mt-8 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100"
-      >
+      <div v-if="isLoading" class="mt-8 flex justify-center">
+        <CircleLoading class="w-8 h-8 text-blue-600" />
+      </div>
+      <div v-else dir="rtl" class="mt-8 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
         <h3 class="font-bold text-gray-900 mb-3">آمار کتابخانه</h3>
         <div class="space-y-2 text-sm">
           <div class="flex justify-between">
