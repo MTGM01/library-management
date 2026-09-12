@@ -4,7 +4,7 @@ import type { BookProps } from "../repository/booksStore";
 import EditBook from "./icons/EditBook.vue";
 import RemoveBook from "./icons/RemoveBook.vue";
 import { convertToCategoryName } from "../helper/showCategory";
-import { computed, ref } from "vue";
+import { computed, onUnmounted, ref } from "vue";
 import UpdateBookModal from "./UpdateBookModal.vue";
 import Calendar from "./icons/Calendar.vue";
 import RemoveConfirm from "./RemoveConfirm.vue";
@@ -23,6 +23,10 @@ const openUpdateBookModal = ref(false);
 const openRemoveBookModal = ref(false);
 const isRemoveLoading = ref(false);
 const isReserveLoading = ref(false);
+const pendingReservation = ref(false);
+const countdown = ref(0);
+let reserveTimer: ReturnType<typeof setTimeout> | null = null;
+let countdownInterval: ReturnType<typeof setInterval> | null = null;
 const isAvailable = computed(() => book.availableCount > 0);
 const canNotReserve = computed(() =>
   authStore.profile?.reservedBooks.some(
@@ -64,7 +68,20 @@ async function handleRemoveBook() {
   }
 }
 
-async function handleReserveBook() {
+function clearTimers() {
+  if (reserveTimer) {
+    clearTimeout(reserveTimer);
+    reserveTimer = null;
+  }
+  if (countdownInterval) {
+    clearInterval(countdownInterval);
+    countdownInterval = null;
+  }
+  countdown.value = 0;
+  pendingReservation.value = false;
+}
+
+async function executeReservation() {
   try {
     isReserveLoading.value = true;
     if (!authStore.profile) throw new Error("User profile not found");
@@ -87,6 +104,35 @@ async function handleReserveBook() {
     isReserveLoading.value = false;
   }
 }
+
+function handleReserveBook() {
+  if (pendingReservation.value) {
+    clearTimers();
+    authStore.removeReservedBook(book._id);
+    showToast("info", "رزرو کتاب لغو شد");
+    return;
+  }
+
+  pendingReservation.value = true;
+  countdown.value = 10;
+
+  countdownInterval = setInterval(() => {
+    countdown.value--;
+    if (countdown.value <= 0) {
+      if (countdownInterval) clearInterval(countdownInterval);
+      countdownInterval = null;
+    }
+  }, 1000);
+
+  reserveTimer = setTimeout(() => {
+    clearTimers();
+    executeReservation();
+  }, 10000);
+}
+
+onUnmounted(() => {
+  clearTimers();
+});
 </script>
 
 <template>
@@ -183,21 +229,27 @@ async function handleReserveBook() {
         v-if="authStore.role === 'USER'"
         class="flex items-center justify-center gap-2 w-full py-3 relative rounded-lg transition-colors font-medium border-none"
         :class="
-          !isAvailable || isReserveLoading || canNotReserve
+          !isAvailable || isReserveLoading
             ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
+            : pendingReservation
+              ? 'bg-amber-500 text-white hover:bg-amber-600 cursor-pointer'
+              : canNotReserve
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 text-white hover:bg-blue-700 cursor-pointer'
         "
         @click="handleReserveBook"
-        :disabled="!isAvailable || isReserveLoading"
+        :disabled="!isAvailable || isReserveLoading || canNotReserve"
       >
         <Calendar class="w-4 h-4" />
         <span>
           {{
-            canNotReserve
-              ? "این کتاب قبلا رزرو شده است"
-              : isAvailable
-                ? "رزرو کتاب"
-                : "در حال حاضر موجود نیست"
+            pendingReservation
+              ? `لغو رزرو (${countdown} ثانیه)`
+              : canNotReserve
+                ? "این کتاب قبلا رزرو شده است"
+                : isAvailable
+                  ? "رزرو کتاب"
+                  : "در حال حاضر موجود نیست"
           }}
         </span>
         <CircleLoading

@@ -1,4 +1,4 @@
-import type { BookProps, Category } from "../repository/book";
+import type { BookProps, Category } from "../repository/booksStore";
 import { httpPut } from "./setup";
 
 export interface API_Update_Book_Input {

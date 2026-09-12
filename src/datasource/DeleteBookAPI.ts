@@ -1,4 +1,4 @@
-import type { BookProps } from "../repository/book";
+import type { BookProps } from "../repository/booksStore";
 import { httpDelete } from "./setup";
 
 export interface API_Remove_Book_Input {

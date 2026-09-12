@@ -1,5 +1,5 @@
-import type { BookProps } from "../repository/book";
-import type { UserProps } from "../repository/user";
+import type { UserProps } from "../repository/authStore";
+import type { BookProps } from "../repository/booksStore";
 import { httpPost } from "./setup";
 
 export interface API_Reserve_Book_Input {

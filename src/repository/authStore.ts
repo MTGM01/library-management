@@ -80,6 +80,16 @@ export const useAuthStore = defineStore("auth", {
       this.persist();
     },
 
+    removeReservedBook(bookId: string) {
+      if (!this.profile) return;
+
+      this.profile = {
+        ...this.profile,
+        reservedBooks: this.profile.reservedBooks.filter((id) => id !== bookId),
+      };
+      this.persist();
+    },
+
     async login(body: API_User_Login_Input) {
       try {
         const result = await API_User_Login(body);
