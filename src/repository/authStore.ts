@@ -22,6 +22,7 @@ export interface UserProps {
   lastName: string;
   status: UserStatus;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 const AUTH_KEY = "isAuthenticated";

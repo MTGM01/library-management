@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 import Header from "../components/Header.vue";
 import Footer from "../components/Footer.vue";
@@ -12,6 +12,8 @@ import Search from "../components/icons/Search.vue";
 import Eye from "../components/icons/Eye.vue";
 import UserManagement from "../components/icons/UserManagement.vue";
 import CircleLoading from "../components/CircleLoading.vue";
+import UserDetailModal from "../components/UserDetailModal.vue";
+import AddUserModal from "../components/AddUserModal.vue";
 import { convertISOToJalali } from "../utils/convertDate";
 import { useAuthStore } from "../repository/authStore";
 import { useUsersStore } from "../repository/usersStore";
@@ -30,9 +32,28 @@ const {
   isLoading,
 } = storeToRefs(usersStore);
 
+const selectedUser = ref<typeof users.value[0] | null>(null);
+const isDetailModalOpen = ref(false);
+const isAddUserModalOpen = ref(false);
+
 onMounted(() => {
   usersStore.fetchUsers();
 });
+
+const toggleUserStatus = async (userId: string, currentStatus: "ACTIVE" | "BLOCK") => {
+  const newStatus = currentStatus === "ACTIVE" ? "BLOCK" : "ACTIVE";
+  await usersStore.updateUserStatus(userId, newStatus);
+};
+
+const openUserDetail = (user: typeof users.value[0]) => {
+  selectedUser.value = user;
+  isDetailModalOpen.value = true;
+};
+
+const closeUserDetail = () => {
+  isDetailModalOpen.value = false;
+  selectedUser.value = null;
+};
 </script>
 
 <template>
@@ -75,6 +96,7 @@ onMounted(() => {
 
               <button
                 class="px-6 py-3 border-none bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 cursor-pointer"
+                @click="isAddUserModalOpen = true"
               >
                 <UserPlus class="w-5 h-5" />
                 <span>افزودن کاربر جدید</span>
@@ -296,6 +318,7 @@ onMounted(() => {
                         type="button"
                         class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border-none bg-transparent cursor-pointer"
                         title="مشاهده جزئیات"
+                        @click="openUserDetail(filteredUser)"
                       >
                         <Eye class="w-5 h-5" />
                       </button>
@@ -304,14 +327,15 @@ onMounted(() => {
                         class="p-2 rounded-lg transition-colors bg-transparent border-none cursor-pointer"
                         :class="
                           filteredUser.status === 'ACTIVE'
-                            ? ' text-green-600 hover:bg-green-50'
+                            ? 'text-green-600 hover:bg-green-50'
                             : 'text-red-600 hover:bg-red-50'
                         "
                         :title="
                           filteredUser.status === 'ACTIVE'
-                            ? 'فعال کردن'
-                            : 'مسدود کردن'
+                            ? 'مسدود کردن'
+                            : 'فعال کردن'
                         "
+                        @click="toggleUserStatus(filteredUser._id, filteredUser.status)"
                       >
                         <UserCheck
                           v-if="filteredUser.status === 'ACTIVE'"
@@ -336,4 +360,15 @@ onMounted(() => {
 
     <Footer dir="ltr" />
   </div>
+
+  <UserDetailModal
+    :is-open="isDetailModalOpen"
+    :user="selectedUser"
+    @close="closeUserDetail"
+  />
+
+  <AddUserModal
+    :is-open="isAddUserModalOpen"
+    @close="isAddUserModalOpen = false"
+  />
 </template>

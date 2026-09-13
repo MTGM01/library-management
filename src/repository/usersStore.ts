@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
-import { API_Users_List } from "../datasource/UserAPI";
+import { API_Users_List, API_Users_Add, API_Users_UpdateStatus } from "../datasource/UserAPI";
+import type { API_Users_Add_Input } from "../datasource/UserAPI";
 import type { UserProps, UserStatus } from "./authStore";
 import { showToast } from "../helper/showToast";
 
@@ -50,6 +51,47 @@ export const useUsersStore = defineStore("users", {
         throw error;
       } finally {
         this.isLoading = false;
+      }
+    },
+
+    async updateUserStatus(userId: string, status: UserStatus) {
+      try {
+        const response = await API_Users_UpdateStatus({ id: userId, status });
+        const updatedUser = response.result;
+        
+        const index = this.users.findIndex((user) => user._id === userId);
+        if (index !== -1) {
+          this.users[index] = updatedUser;
+        }
+        
+        showToast("success", status === "ACTIVE" ? "کاربر فعال شد" : "کاربر مسدود شد");
+        return updatedUser;
+      } catch (error: any) {
+        console.error(error);
+        if (error instanceof TypeError && error.message.includes("fetch")) {
+          showToast("error", "اتصال به اینترنت برقرار نیست");
+        } else {
+          showToast("error", "خطا در تغییر وضعیت کاربر");
+        }
+        throw error;
+      }
+    },
+
+    async addUser(body: API_Users_Add_Input) {
+      try {
+        const response = await API_Users_Add(body);
+        const newUser = response.result;
+        this.users.push(newUser);
+        showToast("success", "کاربر جدید با موفقیت ایجاد شد");
+        return newUser;
+      } catch (error: any) {
+        console.error(error);
+        if (error instanceof TypeError && error.message.includes("fetch")) {
+          showToast("error", "اتصال به اینترنت برقرار نیست");
+        } else {
+          showToast("error", "خطا در ایجاد کاربر جدید");
+        }
+        throw error;
       }
     },
 
