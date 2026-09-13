@@ -41,6 +41,7 @@ export interface BookProps {
   total: number;
   availableCount: number;
   description: string;
+  coverImage?: string;
 }
 
 export type AddBookInput = API_Add_Book_Input;

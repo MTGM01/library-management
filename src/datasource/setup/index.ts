@@ -69,9 +69,38 @@ export async function httpDelete<T>(path: string, body: object): Promise<T> {
   }
 }
 
-// مثال استفاده:
-// const res = await httpPost('/users/register', {
-//   userName: "Loyal.Weissnat",
-//   password: "FnrGNK56789",
-//   mobile: "587-886-6995"
-// });
+export async function httpPostFormData<T>(
+  path: string,
+  formData: FormData,
+): Promise<T> {
+  try {
+    const response = await fetch(`${baseApi}${path}`, {
+      method: "POST",
+      body: formData,
+    });
+    return await handleResponse<T>(response);
+  } catch (error: any) {
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw error;
+    }
+    throw error;
+  }
+}
+
+export async function httpPutFormData<T>(
+  path: string,
+  formData: FormData,
+): Promise<T> {
+  try {
+    const response = await fetch(`${baseApi}${path}`, {
+      method: "PUT",
+      body: formData,
+    });
+    return await handleResponse<T>(response);
+  } catch (error: any) {
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw error;
+    }
+    throw error;
+  }
+}
