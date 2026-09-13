@@ -33,20 +33,13 @@ const canNotReserve = computed(() =>
     (reservedBook) => reservedBook === book._id,
   ),
 );
-const bookImageMap: Record<string, string> = {
-  "computer-programming-book":
-    "https://images.unsplash.com/photo-1732304722020-be33345c00c3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb21wdXRlciUyMHByb2dyYW1taW5nJTIwYm9va3xlbnwxfHx8fDE3NzAyODI5NDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
-  "classic-literature-book":
-    "https://images.unsplash.com/photo-1760120482171-d9d5468f75fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjbGFzc2ljJTIwbGl0ZXJhdHVyZSUyMGJvb2t8ZW58MXx8fHwxNzcwMjcxMjUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-  "ancient-history-book":
-    "https://images.unsplash.com/photo-1768927124431-77a94b280be6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhbmNpZW50JTIwaGlzdG9yeSUyMGJvb2t8ZW58MXx8fHwxNzcwMzA3MDgzfDA&ixlib=rb-4.1.0&q=80&w=1080",
-  "physics-textbook":
-    "https://images.unsplash.com/photo-1626885228113-0ac4b52e6cea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwaHlzaWNzJTIwdGV4dGJvb2t8ZW58MXx8fHwxNzcwMjc3MTAwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-  "fantasy-fiction-book":
-    "https://images.unsplash.com/photo-1760448847959-bd3aec9e672c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYW50YXN5JTIwZmljdGlvbiUyMGJvb2t8ZW58MXx8fHwxNzcwMjk4NjI0fDA&ixlib=rb-4.1.0&q=80&w=1080",
-  "psychology-book":
-    "https://images.unsplash.com/photo-1549186723-be943b08f2c9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwc3ljaG9sb2d5JTIwYm9va3xlbnwxfHx8fDE3NzAzMDcwODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
-};
+const defaultBookImage =
+  "https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover";
+const bookImageUrl = computed(() =>
+  book.coverImage
+    ? `http://localhost:4000/uploads/book-covers/${book.coverImage}`
+    : defaultBookImage,
+);
 
 async function handleRemoveBook() {
   try {
@@ -189,7 +182,7 @@ onUnmounted(() => {
         </span>
       </div>
       <ImageWithFallback
-        :src="bookImageMap['computer-programming-book']"
+        :src="bookImageUrl"
         :alt="book.title"
         className="w-full h-full object-cover"
       />

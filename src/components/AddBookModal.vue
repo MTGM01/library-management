@@ -25,7 +25,27 @@ const category = ref<Category>("all");
 const isbn = ref("");
 const total = ref(0);
 const description = ref("");
+const coverImageFile = ref<File | null>(null);
+const coverImagePreview = ref("");
 const categories = computed(() => booksCategories);
+
+function handleFileChange(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("error", "حجم تصویر نباید بیشتر از ۵ مگابایت باشد");
+      return;
+    }
+    coverImageFile.value = file;
+    coverImagePreview.value = URL.createObjectURL(file);
+  }
+}
+
+function removeImage() {
+  coverImageFile.value = null;
+  coverImagePreview.value = "";
+}
 
 async function handleAddBook() {
   try {
@@ -37,6 +57,7 @@ async function handleAddBook() {
       category: category.value,
       total: total.value,
       description: description.value,
+      coverImage: coverImageFile.value ?? undefined,
     });
     emit("close");
     showToast(
@@ -50,6 +71,9 @@ async function handleAddBook() {
     isbn.value = "";
     category.value = "all";
     total.value = 0;
+    description.value = "";
+    coverImageFile.value = null;
+    coverImagePreview.value = "";
   } catch (error: any) {
     console.error(error);
     if (error instanceof TypeError && error.message.includes("fetch")) {
@@ -85,6 +109,36 @@ async function handleAddBook() {
       </div>
 
       <form @submit.prevent="handleAddBook" class="p-6 space-y-4">
+        <div class="flex flex-col w-full">
+          <label class="text-sm font-medium text-gray-700 mb-2">
+            تصویر کتاب
+          </label>
+          <div v-if="coverImagePreview" class="relative mb-2">
+            <img
+              :src="coverImagePreview"
+              alt="پیش‌نمایش تصویر کتاب"
+              class="w-full h-48 object-cover rounded-lg border border-solid border-gray-200"
+            />
+            <button
+              type="button"
+              @click="removeImage"
+              class="absolute top-2 left-2 bg-white p-1 rounded-full shadow-md hover:bg-red-50 transition-colors border-none cursor-pointer"
+            >
+              <Close class="w-4 h-4 text-red-600" />
+            </button>
+          </div>
+          <input
+            v-if="!coverImagePreview"
+            type="file"
+            accept="image/*"
+            @change="handleFileChange"
+            class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 file:ml-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:font-medium file:cursor-pointer file:hover:bg-blue-100"
+          />
+          <p v-if="!coverImagePreview" class="text-xs text-gray-500 mt-1">
+            اختیاری - حداکثر ۵ مگابایت
+          </p>
+        </div>
+
         <div class="flex flex-col w-full">
           <label class="text-sm font-medium text-gray-700 mb-2">
             نام کتاب *
