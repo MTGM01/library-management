@@ -6,8 +6,9 @@ import BookOpen from "../components/icons/BookOpen.vue";
 import Header from "../components/Header.vue";
 import Footer from "../components/Footer.vue";
 import CircleLoading from "../components/CircleLoading.vue";
+import ImageWithFallback from "../components/ImageWithFallback.vue";
 import { useAuthStore } from "../repository/authStore";
-import { useBooksStore } from "../repository/booksStore";
+import { useBooksStore, type BookProps } from "../repository/booksStore";
 
 const authStore = useAuthStore();
 const booksStore = useBooksStore();
@@ -20,6 +21,15 @@ const reservedBooks = computed(() => {
     books.value?.filter((book) => reservedBookIds.includes(book._id)) ?? []
   );
 });
+
+const defaultBookImage =
+  "https://placehold.co/400x600/e2e8f0/64748b?text=No+Cover";
+
+function bookCoverUrl(book: BookProps): string {
+  return book.coverImage
+    ? `http://localhost:4000/uploads/book-covers/${book.coverImage}`
+    : defaultBookImage;
+}
 
 onMounted(() => {
   booksStore.fetchBooks("all");
@@ -115,9 +125,13 @@ onMounted(() => {
             >
               <div class="flex items-center gap-4">
                 <div
-                  class="w-20 h-28 bg-gradient-to-br from-blue-100 to-blue-200 rounded-lg flex items-center justify-center shadow-md"
+                  class="w-20 h-28 rounded-lg overflow-hidden shadow-md shrink-0"
                 >
-                  <BookOpen class="w-10 h-10 text-blue-600" />
+                  <ImageWithFallback
+                    :src="bookCoverUrl(book)"
+                    :alt="book.title"
+                    className="w-full h-full object-cover"
+                  />
                 </div>
 
                 <div class="flex-1">

@@ -41,8 +41,6 @@ export const BLOCKED_MESSAGE =
 async function navigateToLogin() {
   try {
     const { default: router } = await import("../router");
-    // Already on login without a pending redirect — nothing to do.
-    // (Also swallows duplicate-navigation errors instead of hard-reloading.)
     if (
       router.currentRoute.value.name === "login" &&
       !router.currentRoute.value.query.redirect

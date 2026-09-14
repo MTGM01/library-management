@@ -85,11 +85,6 @@ async function handleAddUser() {
     resetForm();
   } catch (error: any) {
     console.error(error);
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      // handled in store
-    } else {
-      // handled in store
-    }
   } finally {
     isLoading.value = false;
   }
@@ -148,7 +143,9 @@ function resetForm() {
               class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="نام را وارد کنید"
             />
-            <span v-if="errors.firstName" class="text-red-500 text-xs mt-1">{{ errors.firstName }}</span>
+            <span v-if="errors.firstName" class="text-red-500 text-xs mt-1">{{
+              errors.firstName
+            }}</span>
           </div>
 
           <div class="flex flex-col w-full">
@@ -162,7 +159,9 @@ function resetForm() {
               class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="نام خانوادگی را وارد کنید"
             />
-            <span v-if="errors.lastName" class="text-red-500 text-xs mt-1">{{ errors.lastName }}</span>
+            <span v-if="errors.lastName" class="text-red-500 text-xs mt-1">{{
+              errors.lastName
+            }}</span>
           </div>
         </div>
 
@@ -177,7 +176,9 @@ function resetForm() {
             class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="نام کاربری را وارد کنید"
           />
-          <span v-if="errors.userName" class="text-red-500 text-xs mt-1">{{ errors.userName }}</span>
+          <span v-if="errors.userName" class="text-red-500 text-xs mt-1">{{
+            errors.userName
+          }}</span>
         </div>
 
         <div class="flex flex-col w-full">
@@ -191,7 +192,9 @@ function resetForm() {
             class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="شماره تماس را وارد کنید"
           />
-          <span v-if="errors.mobile" class="text-red-500 text-xs mt-1">{{ errors.mobile }}</span>
+          <span v-if="errors.mobile" class="text-red-500 text-xs mt-1">{{
+            errors.mobile
+          }}</span>
         </div>
 
         <div class="flex flex-col w-full">
@@ -205,7 +208,9 @@ function resetForm() {
             class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="رمز عبور را وارد کنید"
           />
-          <span v-if="errors.password" class="text-red-500 text-xs mt-1">{{ errors.password }}</span>
+          <span v-if="errors.password" class="text-red-500 text-xs mt-1">{{
+            errors.password
+          }}</span>
         </div>
 
         <div class="flex flex-col w-full">
@@ -219,7 +224,11 @@ function resetForm() {
             class="px-4 py-2 border border-solid border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="رمز عبور را مجدداً وارد کنید"
           />
-          <span v-if="errors.confirmPassword" class="text-red-500 text-xs mt-1">{{ errors.confirmPassword }}</span>
+          <span
+            v-if="errors.confirmPassword"
+            class="text-red-500 text-xs mt-1"
+            >{{ errors.confirmPassword }}</span
+          >
         </div>
 
         <div class="flex items-center gap-3 pt-4">

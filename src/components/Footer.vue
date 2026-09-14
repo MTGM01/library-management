@@ -3,14 +3,6 @@ import BookOpen from "./icons/BookOpen.vue";
 import Mail from "./icons/Mail.vue";
 import MapPin from "./icons/MapPin.vue";
 import Phone from "./icons/phone.vue";
-
-// import { BookOpen, Mail, Phone, MapPin } from "lucide-react";
-
-// export function Footer() {
-//   return (
-
-//   );
-// }
 </script>
 
 <template>

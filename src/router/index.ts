@@ -41,8 +41,6 @@ router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore(pinia);
 
   if (to.name === "login") {
-    // Authentication middleware: without BOTH the isAuthenticated flag and
-    // a stored user-profile there is no session — clear leftovers, stay here.
     if (!authStore.hasValidSession) {
       authStore.logout();
       return next();
@@ -60,9 +58,6 @@ router.beforeEach(async (to, _from, next) => {
     return next();
   }
 
-  // Authentication middleware: a protected route needs BOTH the
-  // isAuthenticated flag AND a stored user-profile. Either one missing
-  // (e.g. cleared storage, half-written session, reload) → login page.
   if (requiresAuth && !authStore.hasValidSession) {
     authStore.logout();
     return next({

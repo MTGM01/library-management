@@ -5,7 +5,7 @@ interface ImageFallbackProps {
   src: string;
   alt?: string;
   className?: string;
-  [key: string]: any; // برای دریافت سایر attributes
+  [key: string]: any;
 }
 
 const { src, alt, className, ...rest } = defineProps<ImageFallbackProps>();
