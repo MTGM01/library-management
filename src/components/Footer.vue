@@ -12,6 +12,7 @@ const booksStore = useBooksStore();
 const showGuide = ref(false);
 
 function showAllBooks() {
+  if (booksStore.selectedCategory === "all") return;
   booksStore.fetchBooks("all").catch(() => {});
 }
 </script>
