@@ -21,6 +21,12 @@ import {
 } from "../datasource/UpdateBookAPI";
 import { showToast } from "../helper/showToast";
 import { isSessionRevokedError } from "../helper/sessionError";
+import {
+  SERVER_ERROR_MESSAGE,
+  getNetworkErrorMessage,
+  isNetworkError,
+  isServerError,
+} from "../helper/httpError";
 
 export type Category =
   | "all"
@@ -112,8 +118,10 @@ export const useBooksStore = defineStore("books", {
       } catch (error: any) {
         console.error(error);
         if (isSessionRevokedError(error)) throw error;
-        if (error instanceof TypeError && error.message.includes("fetch")) {
-          showToast("error", "اتصال به اینترنت برقرار نیست");
+        if (isServerError(error)) {
+          showToast("error", SERVER_ERROR_MESSAGE);
+        } else if (isNetworkError(error)) {
+          showToast("error", getNetworkErrorMessage());
         } else {
           showToast("error", "خطا در دریافت لیست کتاب‌ها");
         }
@@ -131,8 +139,10 @@ export const useBooksStore = defineStore("books", {
       } catch (error: any) {
         console.error(error);
         if (isSessionRevokedError(error)) throw error;
-        if (error instanceof TypeError && error.message.includes("fetch")) {
-          showToast("error", "اتصال به اینترنت برقرار نیست");
+        if (isServerError(error)) {
+          showToast("error", SERVER_ERROR_MESSAGE);
+        } else if (isNetworkError(error)) {
+          showToast("error", getNetworkErrorMessage());
         } else {
           showToast("error", "خطا در افزودن کتاب");
         }
@@ -153,8 +163,10 @@ export const useBooksStore = defineStore("books", {
       } catch (error: any) {
         console.error(error);
         if (isSessionRevokedError(error)) throw error;
-        if (error instanceof TypeError && error.message.includes("fetch")) {
-          showToast("error", "اتصال به اینترنت برقرار نیست");
+        if (isServerError(error)) {
+          showToast("error", SERVER_ERROR_MESSAGE);
+        } else if (isNetworkError(error)) {
+          showToast("error", getNetworkErrorMessage());
         } else {
           showToast("error", "خطا در ویرایش کتاب");
         }
@@ -170,8 +182,10 @@ export const useBooksStore = defineStore("books", {
       } catch (error: any) {
         console.error(error);
         if (isSessionRevokedError(error)) throw error;
-        if (error instanceof TypeError && error.message.includes("fetch")) {
-          showToast("error", "اتصال به اینترنت برقرار نیست");
+        if (isServerError(error)) {
+          showToast("error", SERVER_ERROR_MESSAGE);
+        } else if (isNetworkError(error)) {
+          showToast("error", getNetworkErrorMessage());
         } else {
           showToast("error", "خطا در حذف کتاب");
         }
@@ -187,8 +201,10 @@ export const useBooksStore = defineStore("books", {
       } catch (error: any) {
         console.error(error);
         if (isSessionRevokedError(error)) throw error;
-        if (error instanceof TypeError && error.message.includes("fetch")) {
-          showToast("error", "اتصال به اینترنت برقرار نیست");
+        if (isServerError(error)) {
+          showToast("error", SERVER_ERROR_MESSAGE);
+        } else if (isNetworkError(error)) {
+          showToast("error", getNetworkErrorMessage());
         } else {
           showToast("error", "خطا در رزرو کتاب");
         }

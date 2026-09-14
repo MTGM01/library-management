@@ -4,6 +4,12 @@ import type { API_Users_Add_Input } from "../datasource/UserAPI";
 import type { UserProps, UserStatus } from "./authStore";
 import { showToast } from "../helper/showToast";
 import { isSessionRevokedError } from "../helper/sessionError";
+import {
+  SERVER_ERROR_MESSAGE,
+  getNetworkErrorMessage,
+  isNetworkError,
+  isServerError,
+} from "../helper/httpError";
 
 export const useUsersStore = defineStore("users", {
   state: () => ({
@@ -45,8 +51,10 @@ export const useUsersStore = defineStore("users", {
       } catch (error: any) {
         console.error(error);
         if (isSessionRevokedError(error)) throw error;
-        if (error instanceof TypeError && error.message.includes("fetch")) {
-          showToast("error", "اتصال به اینترنت برقرار نیست");
+        if (isServerError(error)) {
+          showToast("error", SERVER_ERROR_MESSAGE);
+        } else if (isNetworkError(error)) {
+          showToast("error", getNetworkErrorMessage());
         } else {
           showToast("error", "خطا در دریافت لیست کاربران");
         }
@@ -71,8 +79,10 @@ export const useUsersStore = defineStore("users", {
       } catch (error: any) {
         console.error(error);
         if (isSessionRevokedError(error)) throw error;
-        if (error instanceof TypeError && error.message.includes("fetch")) {
-          showToast("error", "اتصال به اینترنت برقرار نیست");
+        if (isServerError(error)) {
+          showToast("error", SERVER_ERROR_MESSAGE);
+        } else if (isNetworkError(error)) {
+          showToast("error", getNetworkErrorMessage());
         } else {
           showToast("error", "خطا در تغییر وضعیت کاربر");
         }
@@ -90,8 +100,10 @@ export const useUsersStore = defineStore("users", {
       } catch (error: any) {
         console.error(error);
         if (isSessionRevokedError(error)) throw error;
-        if (error instanceof TypeError && error.message.includes("fetch")) {
-          showToast("error", "اتصال به اینترنت برقرار نیست");
+        if (isServerError(error)) {
+          showToast("error", SERVER_ERROR_MESSAGE);
+        } else if (isNetworkError(error)) {
+          showToast("error", getNetworkErrorMessage());
         } else {
           showToast("error", "خطا در ایجاد کاربر جدید");
         }

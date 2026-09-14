@@ -10,6 +10,12 @@ import {
   setUnauthenticatedHandler,
 } from "../datasource/setup";
 import { showToast } from "../helper/showToast";
+import {
+  SERVER_ERROR_MESSAGE,
+  getNetworkErrorMessage,
+  isNetworkError,
+  isServerError,
+} from "../helper/httpError";
 import type { BookProps } from "./booksStore";
 
 export type UserRole = "ADMIN" | "USER";
@@ -231,13 +237,10 @@ export const useAuthStore = defineStore("auth", {
         if (error.message === "USER_BLOCKED") {
           throw error;
         }
-        if (error instanceof TypeError && error.message.includes("fetch")) {
-          showToast("error", "اتصال به اینترنت برقرار نیست");
-        } else if (error.status >= 500 && error.status < 600) {
-          showToast(
-            "error",
-            "خطای سرور. لطفاً بعداً تلاش کنید یا با پشتیبانی تماس بگیرید.",
-          );
+        if (isNetworkError(error)) {
+          showToast("error", getNetworkErrorMessage());
+        } else if (isServerError(error)) {
+          showToast("error", SERVER_ERROR_MESSAGE);
         } else if (error.message && error.message.includes("401")) {
           showToast("error", "نام کاربری یا رمز عبور اشتباه است");
         } else if (error.message && error.message.includes("404")) {

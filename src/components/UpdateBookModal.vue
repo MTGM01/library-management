@@ -5,6 +5,12 @@ import CircleLoading from "./CircleLoading.vue";
 import { showToast } from "../helper/showToast";
 import { isSessionRevokedError } from "../helper/sessionError";
 import {
+  SERVER_ERROR_MESSAGE,
+  getNetworkErrorMessage,
+  isNetworkError,
+  isServerError,
+} from "../helper/httpError";
+import {
   booksCategories,
   type BookProps,
   type Category,
@@ -87,8 +93,10 @@ async function handleUpdateBook() {
   } catch (error: any) {
     console.error(error);
     if (isSessionRevokedError(error)) return;
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      showToast("error", "اتصال به اینترنت برقرار نیست");
+    if (isServerError(error)) {
+      showToast("error", SERVER_ERROR_MESSAGE);
+    } else if (isNetworkError(error)) {
+      showToast("error", getNetworkErrorMessage());
     } else {
       showToast("error", "خطا در ویرایش کتاب");
     }

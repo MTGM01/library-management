@@ -10,6 +10,12 @@ import Calendar from "./icons/Calendar.vue";
 import RemoveConfirm from "./RemoveConfirm.vue";
 import { showToast } from "../helper/showToast";
 import { isSessionRevokedError } from "../helper/sessionError";
+import {
+  SERVER_ERROR_MESSAGE,
+  getNetworkErrorMessage,
+  isNetworkError,
+  isServerError,
+} from "../helper/httpError";
 import CircleLoading from "./CircleLoading.vue";
 import { useAuthStore } from "../repository/authStore";
 import { useBooksStore } from "../repository/booksStore";
@@ -57,8 +63,10 @@ async function handleRemoveBook() {
   } catch (error: any) {
     console.error(error);
     if (isSessionRevokedError(error)) return;
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      showToast("error", "اتصال به اینترنت برقرار نیست");
+    if (isServerError(error)) {
+      showToast("error", SERVER_ERROR_MESSAGE);
+    } else if (isNetworkError(error)) {
+      showToast("error", getNetworkErrorMessage());
     } else {
       showToast("error", "خطا در حذف کتاب");
     }
@@ -99,8 +107,10 @@ async function executeReservation() {
   } catch (error: any) {
     console.error(error);
     if (isSessionRevokedError(error)) return;
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      showToast("error", "اتصال به اینترنت برقرار نیست");
+    if (isServerError(error)) {
+      showToast("error", SERVER_ERROR_MESSAGE);
+    } else if (isNetworkError(error)) {
+      showToast("error", getNetworkErrorMessage());
     } else {
       showToast("error", "خطا در رزرو کتاب");
     }

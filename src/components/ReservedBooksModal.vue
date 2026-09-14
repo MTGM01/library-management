@@ -6,6 +6,12 @@ import CircleLoading from "./CircleLoading.vue";
 import { API_Deliver_Book } from "../datasource/ReserveBookAPI";
 import { showToast } from "../helper/showToast";
 import { isSessionRevokedError } from "../helper/sessionError";
+import {
+  SERVER_ERROR_MESSAGE,
+  getNetworkErrorMessage,
+  isNetworkError,
+  isServerError,
+} from "../helper/httpError";
 import type { UserProps } from "../repository/authStore";
 import type { BookProps } from "../repository/booksStore";
 
@@ -55,8 +61,10 @@ const handleDeliver = async (book: BookProps) => {
   } catch (error: any) {
     console.error(error);
     if (isSessionRevokedError(error)) return;
-    if (error instanceof TypeError && error.message.includes("fetch")) {
-      showToast("error", "اتصال به اینترنت برقرار نیست");
+    if (isServerError(error)) {
+      showToast("error", SERVER_ERROR_MESSAGE);
+    } else if (isNetworkError(error)) {
+      showToast("error", getNetworkErrorMessage());
     } else if (error.message && error.message.includes("404")) {
       showToast("error", "رزرو یافت نشد");
     } else {
