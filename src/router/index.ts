@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from "../pages/Home.vue";
 import Login from "../pages/Login.vue"; // صفحه لاگین رو import کنید
 import Users from "../pages/Users.vue";
-import UserDetail from "../pages/UserDetail.vue";
 import MyReservations from "../pages/MyReservations.vue";
 import { pinia } from "../repository/pinia";
 import { useAuthStore } from "../repository/authStore";
@@ -29,11 +28,6 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: "/users/:userId",
-      component: UserDetail,
-      meta: { requiresAuth: true },
-    },
-    {
       path: "/my-reservations",
       name: "my-reservations",
       component: MyReservations,
@@ -42,27 +36,52 @@ const router = createRouter({
   ],
 });
 
-// تعریف router guard
-router.beforeEach((to, _from, next) => {
-  // بررسی آیا مسیر نیاز به احراز هویت دارد
+router.beforeEach(async (to, _from, next) => {
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+  const authStore = useAuthStore(pinia);
 
-  // بررسی وضعیت لاگین
-  const { isAuthenticated } = useAuthStore(pinia);
-
-  if (requiresAuth && !isAuthenticated) {
-    // اگر نیاز به احراز هویت دارد و لاگین نیست، برو به صفحه لاگین
-    next({
-      name: "login",
-      query: { redirect: to.fullPath }, // آدرس فعلی رو ذخیره کن تا بعد از لاگین برگرده
-    });
-  } else if (to.name === "login" && isAuthenticated) {
-    // اگر کاربر لاگین است و می‌خواد بره به صفحه لاگین، بفرست به صفحه اصلی
-    next({ name: "home" });
-  } else {
-    // در غیر اینصورت اجازه دسترسی بده
-    next();
+  if (to.name === "login") {
+    if (!authStore.isAuthenticated) return next();
+    if (authStore.isBlocked) {
+      await authStore.forceLogoutBlocked();
+      return next();
+    }
+    try {
+      await authStore.refreshSessionStatus();
+    } catch {
+      return next();
+    }
+    if (authStore.isAuthenticated) return next({ name: "home" });
+    return next();
   }
+
+  if (requiresAuth && !authStore.isAuthenticated) {
+    return next({
+      name: "login",
+      query: { redirect: to.fullPath },
+    });
+  }
+
+  if (requiresAuth && authStore.isAuthenticated) {
+    if (authStore.isBlocked) {
+      await authStore.forceLogoutBlocked();
+      return next(false);
+    }
+    try {
+      const stillValid = await authStore.refreshSessionStatus();
+      if (!stillValid) {
+        return next({
+          name: "login",
+          query: { redirect: to.fullPath },
+        });
+      }
+    } catch {
+      if (!useAuthStore(pinia).isAuthenticated) return next(false);
+      return next();
+    }
+  }
+
+  return next();
 });
 
 export default router;

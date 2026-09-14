@@ -5,6 +5,7 @@ import BookOpen from "./icons/BookOpen.vue";
 import CircleLoading from "./CircleLoading.vue";
 import { API_Deliver_Book } from "../datasource/ReserveBookAPI";
 import { showToast } from "../helper/showToast";
+import { isSessionRevokedError } from "../helper/sessionError";
 import type { UserProps } from "../repository/authStore";
 import type { BookProps } from "../repository/booksStore";
 
@@ -53,6 +54,7 @@ const handleDeliver = async (book: BookProps) => {
     emit("deliver");
   } catch (error: any) {
     console.error(error);
+    if (isSessionRevokedError(error)) return;
     if (error instanceof TypeError && error.message.includes("fetch")) {
       showToast("error", "اتصال به اینترنت برقرار نیست");
     } else if (error.message && error.message.includes("404")) {

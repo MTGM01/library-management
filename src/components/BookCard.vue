@@ -9,6 +9,7 @@ import UpdateBookModal from "./UpdateBookModal.vue";
 import Calendar from "./icons/Calendar.vue";
 import RemoveConfirm from "./RemoveConfirm.vue";
 import { showToast } from "../helper/showToast";
+import { isSessionRevokedError } from "../helper/sessionError";
 import CircleLoading from "./CircleLoading.vue";
 import { useAuthStore } from "../repository/authStore";
 import { useBooksStore } from "../repository/booksStore";
@@ -55,6 +56,7 @@ async function handleRemoveBook() {
     );
   } catch (error: any) {
     console.error(error);
+    if (isSessionRevokedError(error)) return;
     if (error instanceof TypeError && error.message.includes("fetch")) {
       showToast("error", "اتصال به اینترنت برقرار نیست");
     } else {
@@ -96,6 +98,7 @@ async function executeReservation() {
     );
   } catch (error: any) {
     console.error(error);
+    if (isSessionRevokedError(error)) return;
     if (error instanceof TypeError && error.message.includes("fetch")) {
       showToast("error", "اتصال به اینترنت برقرار نیست");
     } else {

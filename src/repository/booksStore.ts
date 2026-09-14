@@ -20,6 +20,7 @@ import {
   type API_Update_Book_Input,
 } from "../datasource/UpdateBookAPI";
 import { showToast } from "../helper/showToast";
+import { isSessionRevokedError } from "../helper/sessionError";
 
 export type Category =
   | "all"
@@ -110,6 +111,7 @@ export const useBooksStore = defineStore("books", {
         return result;
       } catch (error: any) {
         console.error(error);
+        if (isSessionRevokedError(error)) throw error;
         if (error instanceof TypeError && error.message.includes("fetch")) {
           showToast("error", "اتصال به اینترنت برقرار نیست");
         } else {
@@ -128,6 +130,7 @@ export const useBooksStore = defineStore("books", {
         return result;
       } catch (error: any) {
         console.error(error);
+        if (isSessionRevokedError(error)) throw error;
         if (error instanceof TypeError && error.message.includes("fetch")) {
           showToast("error", "اتصال به اینترنت برقرار نیست");
         } else {
@@ -149,6 +152,7 @@ export const useBooksStore = defineStore("books", {
         return result;
       } catch (error: any) {
         console.error(error);
+        if (isSessionRevokedError(error)) throw error;
         if (error instanceof TypeError && error.message.includes("fetch")) {
           showToast("error", "اتصال به اینترنت برقرار نیست");
         } else {
@@ -165,6 +169,7 @@ export const useBooksStore = defineStore("books", {
         return result;
       } catch (error: any) {
         console.error(error);
+        if (isSessionRevokedError(error)) throw error;
         if (error instanceof TypeError && error.message.includes("fetch")) {
           showToast("error", "اتصال به اینترنت برقرار نیست");
         } else {
@@ -181,6 +186,7 @@ export const useBooksStore = defineStore("books", {
         return result;
       } catch (error: any) {
         console.error(error);
+        if (isSessionRevokedError(error)) throw error;
         if (error instanceof TypeError && error.message.includes("fetch")) {
           showToast("error", "اتصال به اینترنت برقرار نیست");
         } else {

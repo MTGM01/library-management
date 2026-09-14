@@ -41,3 +41,12 @@ export interface API_Users_UpdateStatus_Output {
 export function API_Users_UpdateStatus(body: API_Users_UpdateStatus_Input) {
   return httpPut<API_Users_UpdateStatus_Output>(`/users/setStatus`, body);
 }
+
+export interface API_Users_GetStatus_Output {
+  result: { _id: string; status: "ACTIVE" | "BLOCK" };
+  message: string;
+}
+
+export function API_Users_GetStatus(userId: string) {
+  return httpGet<API_Users_GetStatus_Output>(`/users/status/${userId}`);
+}

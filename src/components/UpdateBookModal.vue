@@ -3,6 +3,7 @@ import { computed, ref } from "vue";
 import Close from "./icons/Close.vue";
 import CircleLoading from "./CircleLoading.vue";
 import { showToast } from "../helper/showToast";
+import { isSessionRevokedError } from "../helper/sessionError";
 import {
   booksCategories,
   type BookProps,
@@ -85,6 +86,7 @@ async function handleUpdateBook() {
     );
   } catch (error: any) {
     console.error(error);
+    if (isSessionRevokedError(error)) return;
     if (error instanceof TypeError && error.message.includes("fetch")) {
       showToast("error", "اتصال به اینترنت برقرار نیست");
     } else {

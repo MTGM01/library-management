@@ -3,7 +3,9 @@ import {
   API_User_Login,
   type API_User_Login_Input,
 } from "../datasource/LoginAPI";
+import { API_Users_GetStatus } from "../datasource/UserAPI";
 import { getKey, removeKey, setKey } from "../datasource/keyval";
+import { setBlockedHandler } from "../datasource/setup";
 import { showToast } from "../helper/showToast";
 import type { BookProps } from "./booksStore";
 
@@ -30,6 +32,18 @@ const AUTH_KEY = "isAuthenticated";
 const PROFILE_KEY = "user-profile";
 const ROLE_KEY = "user-role";
 
+export const BLOCKED_MESSAGE =
+  "حساب کاربری شما مسدود شده است. لطفاً به صورت حضوری به کتابخانه مراجعه کنید.";
+
+async function navigateToLogin() {
+  try {
+    const { default: router } = await import("../router");
+    await router.push({ name: "login" });
+  } catch {
+    window.location.assign("/login");
+  }
+}
+
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     isAuthenticated: getKey<boolean>(AUTH_KEY) ?? false,
@@ -42,6 +56,7 @@ export const useAuthStore = defineStore("auth", {
     mobile: (state) => state.profile?.mobile ?? "",
     isAdmin: (state) => state.role === "ADMIN",
     isUser: (state) => state.role === "USER",
+    isBlocked: (state) => state.profile?.status === "BLOCK",
   },
 
   actions: {
@@ -92,9 +107,72 @@ export const useAuthStore = defineStore("auth", {
       this.persist();
     },
 
+    initBlockedHandler() {
+      setBlockedHandler(() => {
+        void this.forceLogoutBlocked();
+      });
+    },
+
+    initForbiddenHandler() {
+      this.initBlockedHandler();
+    },
+
+    async forceLogoutBlocked() {
+      const wasAuthenticated = this.isAuthenticated;
+      this.logout();
+      if (wasAuthenticated) {
+        showToast("error", BLOCKED_MESSAGE);
+      }
+      await navigateToLogin();
+    },
+
+    async refreshSessionStatus(): Promise<boolean> {
+      if (!this.isAuthenticated || !this.profile?._id) {
+        return false;
+      }
+
+      if (this.profile.status === "BLOCK") {
+        await this.forceLogoutBlocked();
+        throw new Error("USER_BLOCKED");
+      }
+
+      try {
+        const response = await API_Users_GetStatus(this.profile._id);
+        const freshStatus = response.result.status;
+
+        if (freshStatus !== this.profile.status) {
+          this.profile = { ...this.profile, status: freshStatus };
+          this.persist();
+        }
+
+        if (freshStatus === "BLOCK") {
+          await this.forceLogoutBlocked();
+          throw new Error("USER_BLOCKED");
+        }
+        return true;
+      } catch (error: any) {
+        if (error?.message === "USER_BLOCKED") throw error;
+        if (error?.status === 404) {
+          await this.forceLogoutBlocked();
+          throw new Error("USER_BLOCKED");
+        }
+        if (error?.status === 401 || error?.status === 403) {
+          throw error;
+        }
+        console.error(error);
+        return true;
+      }
+    },
+
     async login(body: API_User_Login_Input) {
       try {
         const result = await API_User_Login(body);
+
+        if (result.result.status === "BLOCK") {
+          showToast("error", BLOCKED_MESSAGE);
+          throw new Error("USER_BLOCKED");
+        }
+
         this.isAuthenticated = true;
         this.profile = result.result;
         this.role = result.result.role;
@@ -107,8 +185,16 @@ export const useAuthStore = defineStore("auth", {
         return result;
       } catch (error: any) {
         console.error(error);
+        if (error.message === "USER_BLOCKED") {
+          throw error;
+        }
         if (error instanceof TypeError && error.message.includes("fetch")) {
           showToast("error", "اتصال به اینترنت برقرار نیست");
+        } else if (error.status >= 500 && error.status < 600) {
+          showToast(
+            "error",
+            "خطای سرور. لطفاً بعداً تلاش کنید یا با پشتیبانی تماس بگیرید.",
+          );
         } else if (error.message && error.message.includes("401")) {
           showToast("error", "نام کاربری یا رمز عبور اشتباه است");
         } else if (error.message && error.message.includes("404")) {

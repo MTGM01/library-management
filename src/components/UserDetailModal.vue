@@ -7,7 +7,7 @@ import BookOpen from "./icons/BookOpen.vue";
 import UserCheck from "./icons/UserCheck.vue";
 import UserCross from "./icons/UserCross.vue";
 import { convertISOToJalali } from "../utils/convertDate";
-import type { UserProps, UserStatus } from "../repository/authStore";
+import type { UserProps } from "../repository/authStore";
 
 interface Props {
   isOpen: boolean;

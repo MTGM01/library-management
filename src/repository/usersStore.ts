@@ -3,6 +3,7 @@ import { API_Users_List, API_Users_Add, API_Users_UpdateStatus } from "../dataso
 import type { API_Users_Add_Input } from "../datasource/UserAPI";
 import type { UserProps, UserStatus } from "./authStore";
 import { showToast } from "../helper/showToast";
+import { isSessionRevokedError } from "../helper/sessionError";
 
 export const useUsersStore = defineStore("users", {
   state: () => ({
@@ -43,6 +44,7 @@ export const useUsersStore = defineStore("users", {
         this.users = plainUsers;
       } catch (error: any) {
         console.error(error);
+        if (isSessionRevokedError(error)) throw error;
         if (error instanceof TypeError && error.message.includes("fetch")) {
           showToast("error", "اتصال به اینترنت برقرار نیست");
         } else {
@@ -68,6 +70,7 @@ export const useUsersStore = defineStore("users", {
         return updatedUser;
       } catch (error: any) {
         console.error(error);
+        if (isSessionRevokedError(error)) throw error;
         if (error instanceof TypeError && error.message.includes("fetch")) {
           showToast("error", "اتصال به اینترنت برقرار نیست");
         } else {
@@ -86,6 +89,7 @@ export const useUsersStore = defineStore("users", {
         return newUser;
       } catch (error: any) {
         console.error(error);
+        if (isSessionRevokedError(error)) throw error;
         if (error instanceof TypeError && error.message.includes("fetch")) {
           showToast("error", "اتصال به اینترنت برقرار نیست");
         } else {
