@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "../pages/Home.vue";
-import Login from "../pages/Login.vue"; // صفحه لاگین رو import کنید
+import Login from "../pages/Login.vue";
 import Users from "../pages/Users.vue";
 import MyReservations from "../pages/MyReservations.vue";
 import { pinia } from "../repository/pinia";
@@ -41,7 +41,12 @@ router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore(pinia);
 
   if (to.name === "login") {
-    if (!authStore.isAuthenticated) return next();
+    // Authentication middleware: without BOTH the isAuthenticated flag and
+    // a stored user-profile there is no session — clear leftovers, stay here.
+    if (!authStore.hasValidSession) {
+      authStore.logout();
+      return next();
+    }
     if (authStore.isBlocked) {
       await authStore.forceLogoutBlocked();
       return next();
@@ -51,18 +56,22 @@ router.beforeEach(async (to, _from, next) => {
     } catch {
       return next();
     }
-    if (authStore.isAuthenticated) return next({ name: "home" });
+    if (authStore.hasValidSession) return next({ name: "home" });
     return next();
   }
 
-  if (requiresAuth && !authStore.isAuthenticated) {
+  // Authentication middleware: a protected route needs BOTH the
+  // isAuthenticated flag AND a stored user-profile. Either one missing
+  // (e.g. cleared storage, half-written session, reload) → login page.
+  if (requiresAuth && !authStore.hasValidSession) {
+    authStore.logout();
     return next({
       name: "login",
       query: { redirect: to.fullPath },
     });
   }
 
-  if (requiresAuth && authStore.isAuthenticated) {
+  if (requiresAuth && authStore.hasValidSession) {
     if (authStore.isBlocked) {
       await authStore.forceLogoutBlocked();
       return next(false);

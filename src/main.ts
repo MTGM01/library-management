@@ -19,9 +19,14 @@ app.use(Toast, {
 });
 
 const authStore = useAuthStore(pinia);
-authStore.initBlockedHandler();
-if (authStore.isAuthenticated && authStore.isBlocked) {
+authStore.initAuthMiddleware();
+// Reload cover: no complete session (missing isAuthenticated flag or
+// user-profile) → clear leftovers; the router guard redirects to login.
+// A locally-known BLOCKed profile is logged out immediately.
+if (authStore.isBlocked) {
   void authStore.forceLogoutBlocked();
+} else if (!authStore.hasValidSession) {
+  authStore.logout();
 }
 
 app.mount("#app");

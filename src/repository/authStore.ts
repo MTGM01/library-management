@@ -5,7 +5,10 @@ import {
 } from "../datasource/LoginAPI";
 import { API_Users_GetStatus } from "../datasource/UserAPI";
 import { getKey, removeKey, setKey } from "../datasource/keyval";
-import { setBlockedHandler } from "../datasource/setup";
+import {
+  setBlockedHandler,
+  setUnauthenticatedHandler,
+} from "../datasource/setup";
 import { showToast } from "../helper/showToast";
 import type { BookProps } from "./booksStore";
 
@@ -38,9 +41,19 @@ export const BLOCKED_MESSAGE =
 async function navigateToLogin() {
   try {
     const { default: router } = await import("../router");
-    await router.push({ name: "login" });
+    // Already on login without a pending redirect — nothing to do.
+    // (Also swallows duplicate-navigation errors instead of hard-reloading.)
+    if (
+      router.currentRoute.value.name === "login" &&
+      !router.currentRoute.value.query.redirect
+    ) {
+      return;
+    }
+    await router.push({ name: "login" }).catch(() => {});
   } catch {
-    window.location.assign("/login");
+    if (window.location.pathname !== "/login") {
+      window.location.assign("/login");
+    }
   }
 }
 
@@ -57,6 +70,13 @@ export const useAuthStore = defineStore("auth", {
     isAdmin: (state) => state.role === "ADMIN",
     isUser: (state) => state.role === "USER",
     isBlocked: (state) => state.profile?.status === "BLOCK",
+    /**
+     * Authentication middleware check: a session is valid only when the
+     * isAuthenticated flag AND a stored user-profile (with id) both exist.
+     * Either one missing means the user must go back to the login page.
+     */
+    hasValidSession: (state) =>
+      state.isAuthenticated === true && !!state.profile?._id,
   },
 
   actions: {
@@ -107,10 +127,25 @@ export const useAuthStore = defineStore("auth", {
       this.persist();
     },
 
-    initBlockedHandler() {
+    /**
+     * Registers the global auth middlewares:
+     * - blocked handler: 401/403 from a protected endpoint, or a locally
+     *   stored BLOCKed profile → toast + logout + login redirect.
+     * - unauthenticated handler: a protected API call attempted with no
+     *   valid session (missing isAuthenticated flag or user-profile) →
+     *   silent logout + login redirect.
+     */
+    initAuthMiddleware() {
       setBlockedHandler(() => {
         void this.forceLogoutBlocked();
       });
+      setUnauthenticatedHandler(() => {
+        void this.handleUnauthenticated();
+      });
+    },
+
+    initBlockedHandler() {
+      this.initAuthMiddleware();
     },
 
     initForbiddenHandler() {
@@ -126,8 +161,18 @@ export const useAuthStore = defineStore("auth", {
       await navigateToLogin();
     },
 
+    /**
+     * Authentication middleware action: clears any half-written session
+     * leftovers and sends the user to the login page (no blocked toast —
+     * the session simply does not exist).
+     */
+    async handleUnauthenticated() {
+      this.logout();
+      await navigateToLogin();
+    },
+
     async refreshSessionStatus(): Promise<boolean> {
-      if (!this.isAuthenticated || !this.profile?._id) {
+      if (!this.hasValidSession || !this.profile?._id) {
         return false;
       }
 

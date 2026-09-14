@@ -10,6 +10,13 @@ export function setBlockedHandler(callback: BlockedHandler) {
 
 export const setForbiddenHandler = setBlockedHandler;
 
+let onUnauthenticatedCallback: BlockedHandler | null = null;
+
+export function setUnauthenticatedHandler(callback: BlockedHandler) {
+  onUnauthenticatedCallback = callback;
+}
+
+const AUTH_KEY = "isAuthenticated";
 const PROFILE_KEY = "user-profile";
 
 function isAuthFreePath(path: string) {
@@ -31,6 +38,18 @@ function readStoredStatus(): string | null {
   }
 }
 
+function readStoredSession(): { isAuthenticated: boolean; hasProfile: boolean } {
+  try {
+    const authRaw = localStorage.getItem(AUTH_KEY);
+    const isAuthenticated = authRaw ? JSON.parse(authRaw) === true : false;
+    const profileRaw = localStorage.getItem(PROFILE_KEY);
+    const profile = profileRaw ? JSON.parse(profileRaw) : null;
+    return { isAuthenticated, hasProfile: !!(profile && profile._id) };
+  } catch {
+    return { isAuthenticated: false, hasProfile: false };
+  }
+}
+
 function notifyBlocked() {
   if (onBlockedCallback) {
     try {
@@ -47,14 +66,38 @@ function blockedError(): any {
   return error;
 }
 
+function notifyUnauthenticated() {
+  if (onUnauthenticatedCallback) {
+    try {
+      onUnauthenticatedCallback();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}
+
+function unauthenticatedError(): any {
+  const error = new Error("UNAUTHENTICATED") as any;
+  error.status = 401;
+  return error;
+}
+
 /**
- * Request middleware: instantly stops any API call when the locally stored
- * session is already BLOCKed (e.g. admin blocked the user while they were
- * exploring the app). The auth store re-validates against the server on
- * route change / reload, so this local check is only a fast first line.
+ * Request middleware (authentication + status):
+ * 1. Stops any protected API call when there is no valid session
+ *    (missing isAuthenticated flag or user-profile) and redirects to login.
+ * 2. Instantly stops any API call when the locally stored session is
+ *    already BLOCKed (e.g. admin blocked the user while they were
+ *    exploring the app).
+ * Auth-free endpoints (login / register / status check) always pass through.
  */
 function assertSessionActive(path: string) {
   if (isAuthFreePath(path)) return;
+  const { isAuthenticated, hasProfile } = readStoredSession();
+  if (!isAuthenticated || !hasProfile) {
+    notifyUnauthenticated();
+    throw unauthenticatedError();
+  }
   if (readStoredStatus() === "BLOCK") {
     notifyBlocked();
     throw blockedError();
