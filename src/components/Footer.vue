@@ -1,8 +1,19 @@
 <script setup lang="ts">
+import { ref } from "vue";
+import { RouterLink } from "vue-router";
 import BookOpen from "./icons/BookOpen.vue";
+import Close from "./icons/Close.vue";
 import Mail from "./icons/Mail.vue";
 import MapPin from "./icons/MapPin.vue";
 import Phone from "./icons/phone.vue";
+import { useBooksStore } from "../repository/booksStore";
+
+const booksStore = useBooksStore();
+const showGuide = ref(false);
+
+function showAllBooks() {
+  booksStore.fetchBooks("all").catch(() => {});
+}
 </script>
 
 <template>
@@ -35,22 +46,38 @@ import Phone from "./icons/phone.vue";
             <li
               class="mb-2 hover:text-blue-400 transition-colors cursor-pointer"
             >
-              <a>همه کتاب‌ها</a>
+              <RouterLink
+                to="/"
+                class="decoration-none text-inherit"
+                @click="showAllBooks"
+              >
+                همه کتاب‌ها
+              </RouterLink>
             </li>
             <li
               class="mb-2 hover:text-blue-400 transition-colors cursor-pointer"
             >
-              <a>دسته‌بندی‌ها</a>
+              <RouterLink
+                :to="{ path: '/', hash: '#categories' }"
+                class="decoration-none text-inherit"
+              >
+                دسته‌بندی‌ها
+              </RouterLink>
             </li>
             <li
               class="mb-2 hover:text-blue-400 transition-colors cursor-pointer"
             >
-              <a>رزروهای من</a>
+              <RouterLink
+                :to="{ name: 'my-reservations' }"
+                class="decoration-none text-inherit"
+              >
+                رزروهای من
+              </RouterLink>
             </li>
             <li
               class="mb-2 hover:text-blue-400 transition-colors cursor-pointer"
             >
-              <a>راهنما</a>
+              <a @click="showGuide = true">راهنما</a>
             </li>
           </ul>
         </div>
@@ -75,6 +102,41 @@ import Phone from "./icons/phone.vue";
         class="border-t border-t-solid border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500"
       >
         <p>© 2026 سیستم مدیریت کتابخانه تمامی حقوق محفوظ است</p>
+      </div>
+    </div>
+
+    <div
+      v-if="showGuide"
+      @click.self="showGuide = false"
+      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      dir="rtl"
+    >
+      <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-xl font-bold text-gray-900 my-0">راهنمای استفاده</h2>
+          <button
+            type="button"
+            @click="showGuide = false"
+            class="p-2 hover:bg-gray-100 rounded-lg transition-colors border-none bg-transparent cursor-pointer"
+          >
+            <Close class="w-5 h-5 text-gray-600" />
+          </button>
+        </div>
+        <ol class="text-sm text-gray-700 leading-loose my-0 pr-5">
+          <li>
+            از بخش «همه کتاب‌ها» کتاب مورد نظر را جست‌وجو کنید یا با
+            «دسته‌بندی‌ها» نتیجه را بر اساس موضوع فیلتر کنید.
+          </li>
+          <li>
+            برای رزرو، دکمه «رزرو کتاب» را بزنید و رزرو را ظرف ۱۰ ثانیه تأیید
+            کنید.
+          </li>
+          <li>کتاب‌های رزروشده را در بخش «رزروهای من» مشاهده کنید.</li>
+          <li>
+            در صورت مسدود شدن حساب کاربری، برای رفع آن به صورت حضوری به کتابخانه
+            مراجعه کنید.
+          </li>
+        </ol>
       </div>
     </div>
   </footer>

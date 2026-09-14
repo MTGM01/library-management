@@ -40,7 +40,10 @@ function selectCategory(categoryValue: Category) {
 </script>
 
 <template>
-  <aside class="w-64 bg-white border-l border-l-solid border-gray-200 p-6">
+  <aside
+    id="categories"
+    class="w-64 bg-white border-l border-l-solid border-gray-200 p-6"
+  >
     <div class="sticky top-24">
       <div class="flex items-center justify-end gap-2 mb-6">
         <h2 class="font-bold text-gray-900 my-0">دسته‌بندی‌ها</h2>
