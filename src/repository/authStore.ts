@@ -5,6 +5,7 @@ import {
 } from "../datasource/LoginAPI";
 import { getKey, removeKey, setKey } from "../datasource/keyval";
 import { showToast } from "../helper/showToast";
+import type { BookProps } from "./booksStore";
 
 export type UserRole = "ADMIN" | "USER";
 export type UserStatus = "ACTIVE" | "BLOCK";
@@ -16,7 +17,7 @@ export interface UserProps {
   mobile: string;
   crime: number;
   role: UserRole;
-  reservedBooks: string[];
+  reservedBooks: (string | BookProps)[];
   dueDate: Date;
   firstName: string;
   lastName: string;

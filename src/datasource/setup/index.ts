@@ -69,6 +69,24 @@ export async function httpDelete<T>(path: string, body: object): Promise<T> {
   }
 }
 
+export async function httpDeleteWithQuery<T>(
+  path: string,
+  params: Record<string, string>,
+): Promise<T> {
+  try {
+    const query = new URLSearchParams(params).toString();
+    const response = await fetch(`${baseApi}${path}?${query}`, {
+      method: "DELETE",
+    });
+    return await handleResponse<T>(response);
+  } catch (error: any) {
+    if (error instanceof TypeError && error.message.includes("fetch")) {
+      throw error;
+    }
+    throw error;
+  }
+}
+
 export async function httpPostFormData<T>(
   path: string,
   formData: FormData,

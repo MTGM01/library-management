@@ -13,6 +13,7 @@ import Eye from "../components/icons/Eye.vue";
 import UserManagement from "../components/icons/UserManagement.vue";
 import CircleLoading from "../components/CircleLoading.vue";
 import UserDetailModal from "../components/UserDetailModal.vue";
+import ReservedBooksModal from "../components/ReservedBooksModal.vue";
 import AddUserModal from "../components/AddUserModal.vue";
 import { convertISOToJalali } from "../utils/convertDate";
 import { useAuthStore } from "../repository/authStore";
@@ -34,6 +35,8 @@ const {
 
 const selectedUser = ref<typeof users.value[0] | null>(null);
 const isDetailModalOpen = ref(false);
+const selectedUserForReservations = ref<typeof users.value[0] | null>(null);
+const isReservedBooksModalOpen = ref(false);
 const isAddUserModalOpen = ref(false);
 
 onMounted(() => {
@@ -53,6 +56,24 @@ const openUserDetail = (user: typeof users.value[0]) => {
 const closeUserDetail = () => {
   isDetailModalOpen.value = false;
   selectedUser.value = null;
+};
+
+const openReservedBooks = (user: typeof users.value[0]) => {
+  selectedUserForReservations.value = user;
+  isReservedBooksModalOpen.value = true;
+};
+
+const closeReservedBooks = () => {
+  isReservedBooksModalOpen.value = false;
+  selectedUserForReservations.value = null;
+};
+
+const handleDeliver = async () => {
+  await usersStore.fetchUsers();
+  if (selectedUserForReservations.value) {
+    const updated = usersStore.users.find((u) => u._id === selectedUserForReservations.value!._id);
+    if (updated) selectedUserForReservations.value = updated;
+  }
 };
 </script>
 
@@ -289,16 +310,19 @@ const closeUserDetail = () => {
                     {{ convertISOToJalali(filteredUser.createdAt) }}
                   </td>
                   <td class="px-6 py-4">
-                    <span
-                      class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                    <button
+                      type="button"
+                      class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border-none cursor-pointer transition-colors"
                       :class="
                         filteredUser.reservedBooks.length > 0
-                          ? 'bg-orange-100 text-orange-700'
-                          : 'bg-gray-100 text-gray-600'
+                          ? 'bg-orange-100 text-orange-700 hover:bg-orange-200'
+                          : 'bg-gray-100 text-gray-600 cursor-default'
                       "
+                      :disabled="filteredUser.reservedBooks.length === 0"
+                      @click="openReservedBooks(filteredUser)"
                     >
                       {{ filteredUser.reservedBooks.length }} کتاب
-                    </span>
+                    </button>
                   </td>
                   <td class="px-6 py-4">
                     <span
@@ -365,6 +389,13 @@ const closeUserDetail = () => {
     :is-open="isDetailModalOpen"
     :user="selectedUser"
     @close="closeUserDetail"
+  />
+
+  <ReservedBooksModal
+    :is-open="isReservedBooksModalOpen"
+    :user="selectedUserForReservations"
+    @close="closeReservedBooks"
+    @deliver="handleDeliver"
   />
 
   <AddUserModal
