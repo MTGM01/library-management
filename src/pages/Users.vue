@@ -33,9 +33,9 @@ const {
   isLoading,
 } = storeToRefs(usersStore);
 
-const selectedUser = ref<typeof users.value[0] | null>(null);
+const selectedUser = ref<(typeof users.value)[0] | null>(null);
 const isDetailModalOpen = ref(false);
-const selectedUserForReservations = ref<typeof users.value[0] | null>(null);
+const selectedUserForReservations = ref<(typeof users.value)[0] | null>(null);
 const isReservedBooksModalOpen = ref(false);
 const isAddUserModalOpen = ref(false);
 
@@ -43,12 +43,15 @@ onMounted(() => {
   usersStore.fetchUsers();
 });
 
-const toggleUserStatus = async (userId: string, currentStatus: "ACTIVE" | "BLOCK") => {
+const toggleUserStatus = async (
+  userId: string,
+  currentStatus: "ACTIVE" | "BLOCK",
+) => {
   const newStatus = currentStatus === "ACTIVE" ? "BLOCK" : "ACTIVE";
   await usersStore.updateUserStatus(userId, newStatus);
 };
 
-const openUserDetail = (user: typeof users.value[0]) => {
+const openUserDetail = (user: (typeof users.value)[0]) => {
   selectedUser.value = user;
   isDetailModalOpen.value = true;
 };
@@ -58,8 +61,9 @@ const closeUserDetail = () => {
   selectedUser.value = null;
 };
 
-const openReservedBooks = (user: typeof users.value[0]) => {
-  selectedUserForReservations.value = user;
+const openReservedBooks = (user: (typeof users.value)[0]) => {
+  const fresh = usersStore.users.find((u) => u._id === user._id) ?? user;
+  selectedUserForReservations.value = fresh;
   isReservedBooksModalOpen.value = true;
 };
 
@@ -71,7 +75,9 @@ const closeReservedBooks = () => {
 const handleDeliver = async () => {
   await usersStore.fetchUsers();
   if (selectedUserForReservations.value) {
-    const updated = usersStore.users.find((u) => u._id === selectedUserForReservations.value!._id);
+    const updated = usersStore.users.find(
+      (u) => u._id === selectedUserForReservations.value!._id,
+    );
     if (updated) selectedUserForReservations.value = updated;
   }
 };
@@ -359,7 +365,12 @@ const handleDeliver = async () => {
                             ? 'مسدود کردن'
                             : 'فعال کردن'
                         "
-                        @click="toggleUserStatus(filteredUser._id, filteredUser.status)"
+                        @click="
+                          toggleUserStatus(
+                            filteredUser._id,
+                            filteredUser.status,
+                          )
+                        "
                       >
                         <UserCheck
                           v-if="filteredUser.status === 'ACTIVE'"
@@ -374,7 +385,10 @@ const handleDeliver = async () => {
             </table>
           </div>
 
-          <div v-if="!isLoading && !filteredUsers?.length" class="text-center py-12">
+          <div
+            v-if="!isLoading && !filteredUsers?.length"
+            class="text-center py-12"
+          >
             <UserManagement class="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p class="text-gray-500">کاربری یافت نشد</p>
           </div>

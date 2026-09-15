@@ -4,7 +4,6 @@ import BookOpen from "./icons/BookOpen.vue";
 import LogOut from "./icons/LogOut.vue";
 import Search from "./icons/Search.vue";
 import UnknownUser from "./icons/UnknownUser.vue";
-import { useRouter } from "vue-router";
 import { useAuthStore } from "../repository/authStore";
 
 const {
@@ -21,7 +20,6 @@ const {
   noSearch?: boolean;
 }>();
 
-const router = useRouter();
 const authStore = useAuthStore();
 
 const searchedBook = defineModel();
@@ -37,7 +35,7 @@ function changeUserRole(role: UserRole) {
 
 function logout() {
   authStore.logout();
-  router.push("/login");
+  window.location.reload();
 }
 </script>
 

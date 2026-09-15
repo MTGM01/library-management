@@ -29,10 +29,17 @@ const emit = defineEmits<{
 const localUser = ref<UserProps | null>(null);
 const deliveringBookId = ref<string | null>(null);
 
+const syncLocalUser = (newUser: UserProps | null) => {
+  localUser.value = newUser
+    ? { ...newUser, reservedBooks: [...newUser.reservedBooks] }
+    : null;
+};
+
 watch(
-  () => props.user,
-  (newUser) => {
-    localUser.value = newUser ? { ...newUser, reservedBooks: [...newUser.reservedBooks] } : null;
+  [() => props.user, () => props.isOpen],
+  ([newUser, isOpen]) => {
+    if (isOpen) syncLocalUser(newUser);
+    else if (newUser === null) syncLocalUser(null);
   },
   { immediate: true },
 );
@@ -40,7 +47,8 @@ watch(
 const reservedBooksList = computed(() => {
   if (!localUser.value) return [];
   return localUser.value.reservedBooks.filter(
-    (book): book is BookProps => typeof book === "object" && book !== null && "_id" in book,
+    (book): book is BookProps =>
+      typeof book === "object" && book !== null && "_id" in book,
   );
 });
 
@@ -118,10 +126,15 @@ const handleDeliver = async (book: BookProps) => {
               type="button"
               class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors border-none cursor-pointer text-sm font-medium flex items-center gap-2"
               :disabled="deliveringBookId !== null"
-              :class="{ 'opacity-50 cursor-not-allowed': deliveringBookId !== null }"
+              :class="{
+                'opacity-50 cursor-not-allowed': deliveringBookId !== null,
+              }"
               @click="handleDeliver(book)"
             >
-              <CircleLoading v-if="deliveringBookId === book._id" class="w-4 h-4" />
+              <CircleLoading
+                v-if="deliveringBookId === book._id"
+                class="w-4 h-4"
+              />
               <span>تحویل</span>
             </button>
           </div>
@@ -133,9 +146,7 @@ const handleDeliver = async (book: BookProps) => {
         </div>
       </div>
 
-      <div v-else class="p-6 text-center text-gray-500">
-        در حال بارگذاری...
-      </div>
+      <div v-else class="p-6 text-center text-gray-500">در حال بارگذاری...</div>
     </div>
   </div>
 </template>

@@ -1,5 +1,9 @@
 import { defineStore } from "pinia";
-import { API_Users_List, API_Users_Add, API_Users_UpdateStatus } from "../datasource/UserAPI";
+import {
+  API_Users_List,
+  API_Users_Add,
+  API_Users_UpdateStatus,
+} from "../datasource/UserAPI";
 import type { API_Users_Add_Input } from "../datasource/UserAPI";
 import type { UserProps, UserStatus } from "./authStore";
 import { showToast } from "../helper/showToast";
@@ -68,13 +72,29 @@ export const useUsersStore = defineStore("users", {
       try {
         const response = await API_Users_UpdateStatus({ id: userId, status });
         const updatedUser = response.result;
-        
+
         const index = this.users.findIndex((user) => user._id === userId);
         if (index !== -1) {
-          this.users[index] = updatedUser;
+          const prevUser = this.users[index]!;
+          const incoming = updatedUser.reservedBooks as unknown[];
+          const incomingIsPopulated =
+            Array.isArray(incoming) &&
+            incoming.length > 0 &&
+            typeof incoming[0] === "object" &&
+            incoming[0] !== null;
+          this.users[index] = {
+            ...prevUser,
+            ...updatedUser,
+            reservedBooks: incomingIsPopulated
+              ? updatedUser.reservedBooks
+              : prevUser.reservedBooks,
+          };
         }
-        
-        showToast("success", status === "ACTIVE" ? "کاربر فعال شد" : "کاربر مسدود شد");
+
+        showToast(
+          "success",
+          status === "ACTIVE" ? "کاربر فعال شد" : "کاربر مسدود شد",
+        );
         return updatedUser;
       } catch (error: any) {
         console.error(error);
